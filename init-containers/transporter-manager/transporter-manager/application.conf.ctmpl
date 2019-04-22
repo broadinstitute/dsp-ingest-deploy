@@ -1,0 +1,11 @@
+{{with $environment := env "ENVIRONMENT"}}
+{{with $secret := vault (printf "secret/dsde/monster/%s/transporter/manager/cloudsql/login" $environment)}}
+org.broadinstitute.transporter {
+    db.username = {{$secret.Data.username}}
+    db.password = {{$secret.Data.password}}
+    db.connect-url = "jdbc:postgresql://sqlproxy.{{$environment}}/{{$secret.Data.db_name}}"
+
+    kafka.bootstrap-servers = ["kafka.{{$environment}}:9200"]
+    kafka.replication-factor = 3
+}
+{{end}}{{end}}
