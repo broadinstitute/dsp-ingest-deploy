@@ -1,0 +1,76 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: transporter-manager
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: transporter-manager
+    spec:
+      serviceAccountName: transporter-manager-sa
+      initContainers:
+        - name: transporter-manager-config
+          image: us.gcr.io/broad-dsp-monster-dev/transporter-manager-config:37d0c6a
+          imagePullPolicy: Always
+          env:
+            - name: ENVIRONMENT
+              value: dev
+            - name: VAULT_TOKEN_FILE
+              value: /etc/vault/token
+          volumeMounts:
+            - name: token
+              mountPath: /etc/vault
+            - name: appdir
+              mountPath: /working
+        - name: transporter-manager-migrations
+          image: broadinstitute/transporter-manager-migrations:891b9ca4cef55ed715fc964d1929730db7794299
+          imagePullPolicy: Always
+          command: [ "/bin/bash", "/etc/entrypoint.sh" ]
+          volumeMounts:
+            - name: appdir
+              mountPath: /etc/entrypoint.sh
+              subPath: transporter-manager-migrations/entrypoint.sh
+      containers:
+        - name: transporter-manager
+          image: broadinstitute/transporter-manager:891b9ca4cef55ed715fc964d1929730db7794299
+          imagePullPolicy: Always
+          command: [ "/bin/bash", "/etc/entrypoint.sh" ]
+          ports:
+            - name: http-port
+              containerPort: 8080
+          volumeMounts:
+            - name: appdir
+              mountPath: /etc/application.conf
+              subPath: transporter-manager/application.conf
+              readOnly: true
+            - name: appdir
+              mountPath: /etc/entrypoint.sh
+              subPath: transporter-manager/entrypoint.sh
+          readinessProbe:
+            httpGet:
+              path: /status
+              port: http-port
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 10
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /status
+              port: http-port
+            initialDelaySeconds: 60
+            periodSeconds: 20
+            timeoutSeconds: 10
+            failureThreshold: 3
+      volumes:
+        - name: token
+          secret:
+            secretName: vault-token
+            items:
+              - key: token
+                path: token
+                mode: 0444
+        - name: appdir
+          emptyDir: {}

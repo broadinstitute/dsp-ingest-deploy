@@ -2,7 +2,7 @@
 
 declare -ra JAVA_OPTS_ARRAY=(
    # Point to rendered config file.
-   -Dconfig.file=/secrets/transporter-manager/application.conf
+   -Dconfig.file=/etc/application.conf
    # Constrain memory.
    -server
    -Xmx2g
