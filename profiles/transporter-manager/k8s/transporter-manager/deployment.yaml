@@ -27,7 +27,7 @@ spec:
         - name: transporter-manager-migrations
           image: broadinstitute/transporter-manager-migrations:efec06a1333761344871325e950e5323f05e20aa
           imagePullPolicy: Always
-          command: [ "/bin/bash", "/etc/entrypoint.sh" ]
+          command: [ "/bin/bash", "/etc/entrypoint.sh", "liquibase", "update" ]
           volumeMounts:
             - name: appdir
               mountPath: /etc/entrypoint.sh
