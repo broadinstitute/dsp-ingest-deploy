@@ -19,7 +19,7 @@ org.broadinstitute.transporter {
         }
 
         gcp {
-            service-account-json = "/secrets/transporter-aws-to-gcp-agent/gcs-writer-sa.json"
+            service-account-json = "/secrets/gcs/credentials.json"
         }
     }
 }

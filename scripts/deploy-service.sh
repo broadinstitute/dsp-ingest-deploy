@@ -12,8 +12,9 @@ function service_dir () {
 }
 
 function apply_config () {
-    kubectl -n dev apply -f $1
-
+    if [ -f $1 ]; then
+        kubectl -n dev apply -f $1
+    fi
 }
 
 function deploy () {

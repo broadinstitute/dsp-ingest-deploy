@@ -1,1 +1,1 @@
-{{with $secret := vault "???"}}{{$secret.Data | toJSON}}{{end}}
+{{with $secret := vault "secret/dsde/monster/dev/transporter/agents/tmp-writer-account.json"}}{{$secret.Data | toJSON}}{{end}}
