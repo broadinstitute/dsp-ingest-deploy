@@ -1,0 +1,56 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: cloudsql-proxy
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: cloudsql-proxy
+    spec:
+      serviceAccountName: cloudsql-proxy-sa
+      initContainers:
+        - name: cloudsql-proxy-config
+          image: us.gcr.io/broad-dsp-monster-dev/cloudsql-proxy-config:17d2cdb
+          imagePullPolicy: Always
+          env:
+            - name: ENVIRONMENT
+              value: dev
+            - name: VAULT_TOKEN_FILE
+              value: /etc/vault/token
+          volumeMounts:
+            - name: token
+              mountPath: /etc/vault
+            - name: appdir
+              mountPath: /working
+      containers:
+        # Make sure to specify image tag in production
+        # Check out the newest version in release page
+        # https://github.com/GoogleCloudPlatform/cloudsql-proxy/releases
+        - name: cloudsql-proxy
+          image: b.gcr.io/cloudsql-docker/gce-proxy:latest
+          # 'Always' if imageTag is 'latest', else set to 'IfNotPresent'
+          imagePullPolicy: Always
+          command: [ "/bin/sh", "/etc/entrypoint.sh" ]
+          ports:
+            - name: db-port
+              containerPort: 5432
+          volumeMounts:
+            - name: appdir
+              mountPath: /secrets/cloudsql/credentials.json
+              subPath: cloudsql-proxy/cloudsql-proxy-sa.json
+              readOnly: true
+            - name: appdir
+              mountPath: /etc/entrypoint.sh
+              subPath: cloudsql-proxy/entrypoint.sh
+      volumes:
+        - name: token
+          secret:
+            secretName: vault-token
+            items:
+              - key: token
+                path: token
+                mode: 0444
+        - name: appdir
+          emptyDir: {}
