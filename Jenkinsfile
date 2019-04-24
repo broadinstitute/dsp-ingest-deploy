@@ -8,9 +8,9 @@ pipeline {
     }
 
     stages {
-        stage('Push init containers') {
+        stage('Build init containers') {
             steps {
-                sh './init-containers/push-containers.sh'
+                sh './scripts/build-init-containers.sh'
             }
         }
     }
