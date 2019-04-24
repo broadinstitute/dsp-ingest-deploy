@@ -1,11 +1,24 @@
 {{with $environment := env "ENVIRONMENT"}}
 {{with $secret := vault (printf "secret/dsde/monster/%s/transporter/manager/cloudsql/login" $environment)}}
 org.broadinstitute.transporter {
-    db.username = {{$secret.Data.username}}
-    db.password = {{$secret.Data.password}}
-    db.connect-url = "jdbc:postgresql://cloudsql-proxy.{{$environment}}/{{$secret.Data.db_name}}"
+    db {
+        username = {{$secret.Data.username}}
+        password = {{$secret.Data.password}}
+        connect-url = "jdbc:postgresql://cloudsql-proxy.{{$environment}}/{{$secret.Data.db_name}}"
 
-    kafka.bootstrap-servers = ["bootstrap.{{$environment}}:9092"]
-    kafka.replication-factor = 3
+        timeouts {
+            connection-timeout: 60s
+            max-connection-lifetime: 30s
+            connection-validation-timeout: 1s
+            leak-detection-threshold: 10s
+        }
+    }
+
+    kafka {
+        bootstrap-servers = ["bootstrap.{{$environment}}:9092"]
+        replication-factor = 3
+
+        timeouts.request-timeout: 30s
+    }
 }
 {{end}}{{end}}
