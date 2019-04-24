@@ -2,7 +2,7 @@
 
 declare -ra JAVA_OPTS_ARRAY=(
    # Point to rendered config file.
-   -Dconfig.file=/secrets/transporter-manager/application.conf
+   -Dconfig.file=/secrets/transporter-aws-to-gcp-agent/application.conf
    # Constrain memory.
    -server
    -Xmx2g
@@ -26,4 +26,4 @@ declare -ra JAVA_OPTS_ARRAY=(
 )
 
 # Inject options into normal entrypoint.
-JAVA_OPTS="${JAVA_OPTS_ARRAY[*]}" exec /app/bin/transporter-manager
+JAVA_OPTS="${JAVA_OPTS_ARRAY[*]}" exec /app/bin/transporter-aws-to-gcp-agent
