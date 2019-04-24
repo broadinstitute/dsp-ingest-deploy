@@ -5,7 +5,7 @@ org.broadinstitute.transporter {
     db.password = {{$secret.Data.password}}
     db.connect-url = "jdbc:postgresql://cloudsql-proxy.{{$environment}}/{{$secret.Data.db_name}}"
 
-    kafka.bootstrap-servers = ["bootstrap.{{$environment}}:9200"]
+    kafka.bootstrap-servers = ["bootstrap.{{$environment}}:9092"]
     kafka.replication-factor = 3
 }
 {{end}}{{end}}

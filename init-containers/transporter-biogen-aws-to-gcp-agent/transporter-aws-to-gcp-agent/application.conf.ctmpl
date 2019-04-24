@@ -8,7 +8,7 @@ org.broadinstitute.transporter {
     }
 
     kafka {
-        bootstrap-servers = ["bootstrap.{{$environment}}:9200"]
+        bootstrap-servers = ["bootstrap.{{$environment}}:9092"]
         application-id = "biogen-aws-to-gcp-agent"
     }
 
