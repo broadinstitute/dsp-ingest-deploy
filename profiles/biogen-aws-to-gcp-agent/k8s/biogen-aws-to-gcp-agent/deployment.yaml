@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: biogen-aws-to-gcp-agent
 spec:
-  replicas: 1
+  replicas: 3
   template:
     metadata:
       labels:
@@ -12,7 +12,7 @@ spec:
       serviceAccountName: biogen-aws-to-gcp-agent-sa
       initContainers:
         - name: biogen-aws-to-gcp-agent-config
-          image: us.gcr.io/broad-dsp-monster-dev/biogen-aws-to-gcp-agent-config:795a65e
+          image: us.gcr.io/broad-dsp-monster-dev/biogen-aws-to-gcp-agent-config:a9a67f9
           imagePullPolicy: Always
           env:
             - name: ENVIRONMENT
@@ -26,9 +26,15 @@ spec:
               mountPath: /working
       containers:
         - name: biogen-aws-to-gcp-agent
-          image: broadinstitute/transporter-aws-to-gcp-agent:4baa39f0a32f8cd3e90af7a76624d9e89b215b47
+          image: broadinstitute/transporter-aws-to-gcp-agent:bbd6634f02dc5d92ab679dcb7ade01e73b33f5c4
           imagePullPolicy: Always
           command: [ "/bin/bash", "/etc/entrypoint.sh" ]
+          resources:
+            requests:
+              cpu: 250m
+              memory: 288Mi
+            limits:
+              memory: 304Mi
           volumeMounts:
             - name: appdir
               mountPath: /etc/application.conf

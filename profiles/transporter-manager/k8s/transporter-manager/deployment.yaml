@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: transporter-manager
 spec:
-  replicas: 1
+  replicas: 2
   template:
     metadata:
       labels:
@@ -12,7 +12,7 @@ spec:
       serviceAccountName: transporter-manager-sa
       initContainers:
         - name: transporter-manager-config
-          image: us.gcr.io/broad-dsp-monster-dev/transporter-manager-config:795a65e
+          image: us.gcr.io/broad-dsp-monster-dev/transporter-manager-config:a9a67f9
           imagePullPolicy: Always
           env:
             - name: ENVIRONMENT
@@ -25,7 +25,7 @@ spec:
             - name: appdir
               mountPath: /working
         - name: transporter-manager-migrations
-          image: broadinstitute/transporter-manager-migrations:4baa39f0a32f8cd3e90af7a76624d9e89b215b47
+          image: broadinstitute/transporter-manager-migrations:bbd6634f02dc5d92ab679dcb7ade01e73b33f5c4
           imagePullPolicy: Always
           command: [ "/bin/bash", "/etc/entrypoint.sh", "liquibase", "update" ]
           volumeMounts:
@@ -34,12 +34,18 @@ spec:
               subPath: transporter-manager-migrations/entrypoint.sh
       containers:
         - name: transporter-manager
-          image: broadinstitute/transporter-manager:4baa39f0a32f8cd3e90af7a76624d9e89b215b47
+          image: broadinstitute/transporter-manager:bbd6634f02dc5d92ab679dcb7ade01e73b33f5c4
           imagePullPolicy: Always
           command: [ "/bin/bash", "/etc/entrypoint.sh" ]
           ports:
             - name: http-port
               containerPort: 8080
+          resources:
+            requests:
+              cpu: 250m
+              memory: 288Mi
+            limits:
+              memory: 304Mi
           volumeMounts:
             - name: appdir
               mountPath: /etc/application.conf
