@@ -12,7 +12,7 @@ spec:
       serviceAccountName: transporter-manager-sa
       initContainers:
         - name: transporter-manager-config
-          image: us.gcr.io/broad-dsp-monster-dev/transporter-manager-config:bd18bf0
+          image: us.gcr.io/broad-dsp-monster-dev/transporter-manager-config:88af1f6
           imagePullPolicy: Always
           env:
             - name: ENVIRONMENT
@@ -25,7 +25,7 @@ spec:
             - name: appdir
               mountPath: /working
         - name: transporter-manager-migrations
-          image: broadinstitute/transporter-manager-migrations:efec06a1333761344871325e950e5323f05e20aa
+          image: broadinstitute/transporter-manager-migrations:4baa39f0a32f8cd3e90af7a76624d9e89b215b47
           imagePullPolicy: Always
           command: [ "/bin/bash", "/etc/entrypoint.sh", "liquibase", "update" ]
           volumeMounts:
@@ -34,7 +34,7 @@ spec:
               subPath: transporter-manager-migrations/entrypoint.sh
       containers:
         - name: transporter-manager
-          image: broadinstitute/transporter-manager:efec06a1333761344871325e950e5323f05e20aa
+          image: broadinstitute/transporter-manager:4baa39f0a32f8cd3e90af7a76624d9e89b215b47
           imagePullPolicy: Always
           command: [ "/bin/bash", "/etc/entrypoint.sh" ]
           ports:

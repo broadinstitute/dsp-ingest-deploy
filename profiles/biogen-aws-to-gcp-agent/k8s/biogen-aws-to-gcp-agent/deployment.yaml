@@ -12,7 +12,7 @@ spec:
       serviceAccountName: biogen-aws-to-gcp-agent-sa
       initContainers:
         - name: biogen-aws-to-gcp-agent-config
-          image: us.gcr.io/broad-dsp-monster-dev/biogen-aws-to-gcp-agent-config:bd18bf0
+          image: us.gcr.io/broad-dsp-monster-dev/biogen-aws-to-gcp-agent-config:88af1f6
           imagePullPolicy: Always
           env:
             - name: ENVIRONMENT
@@ -26,7 +26,7 @@ spec:
               mountPath: /working
       containers:
         - name: biogen-aws-to-gcp-agent
-          image: broadinstitute/transporter-aws-to-gcp-agent:efec06a1333761344871325e950e5323f05e20aa
+          image: broadinstitute/transporter-aws-to-gcp-agent:4baa39f0a32f8cd3e90af7a76624d9e89b215b47
           imagePullPolicy: Always
           command: [ "/bin/bash", "/etc/entrypoint.sh" ]
           volumeMounts:

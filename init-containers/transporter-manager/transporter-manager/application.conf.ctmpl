@@ -5,20 +5,11 @@ org.broadinstitute.transporter {
         username = {{$secret.Data.username}}
         password = {{$secret.Data.password}}
         connect-url = "jdbc:postgresql://cloudsql-proxy.{{$environment}}/{{$secret.Data.db_name}}"
-
-        timeouts {
-            connection-timeout: 60s
-            max-connection-lifetime: 30s
-            connection-validation-timeout: 1s
-            leak-detection-threshold: 10s
-        }
     }
 
     kafka {
         bootstrap-servers = ["bootstrap.{{$environment}}:9092"]
         replication-factor = 3
-
-        timeouts.request-timeout: 30s
     }
 }
 {{end}}{{end}}
