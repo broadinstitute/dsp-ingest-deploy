@@ -12,7 +12,7 @@ spec:
       serviceAccountName: cloudsql-proxy-sa
       initContainers:
         - name: cloudsql-proxy-config
-          image: us.gcr.io/broad-dsp-monster-dev/cloudsql-proxy-config:0080a4b
+          image: us.gcr.io/broad-dsp-monster-dev/cloudsql-proxy-config:795a65e
           imagePullPolicy: Always
           env:
             - name: ENVIRONMENT

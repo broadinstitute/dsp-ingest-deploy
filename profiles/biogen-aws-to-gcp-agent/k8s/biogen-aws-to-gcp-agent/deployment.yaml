@@ -12,7 +12,7 @@ spec:
       serviceAccountName: biogen-aws-to-gcp-agent-sa
       initContainers:
         - name: biogen-aws-to-gcp-agent-config
-          image: us.gcr.io/broad-dsp-monster-dev/biogen-aws-to-gcp-agent-config:0080a4b
+          image: us.gcr.io/broad-dsp-monster-dev/biogen-aws-to-gcp-agent-config:795a65e
           imagePullPolicy: Always
           env:
             - name: ENVIRONMENT

@@ -1,5 +1,5 @@
 {{with $environment := env "ENVIRONMENT"}}
-{{with $s3_secret := vault "secret/dsde/gotc/prod/common/ukbb"}}
+{{with $s3_secret := vault (printf "secret/dsde/monster/%s/transporter/agents/ukbb-biogen" $environment)}}
 org.broadinstitute.transporter {
 
     queue {
