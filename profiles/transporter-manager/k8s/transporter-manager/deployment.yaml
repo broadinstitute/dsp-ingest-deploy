@@ -12,7 +12,7 @@ spec:
       serviceAccountName: transporter-manager-sa
       initContainers:
         - name: transporter-manager-config
-          image: us.gcr.io/broad-dsp-monster-dev/transporter-manager-config:b8a4814
+          image: us.gcr.io/broad-dsp-monster-dev/transporter-manager-config:0080a4b
           imagePullPolicy: Always
           env:
             - name: ENVIRONMENT

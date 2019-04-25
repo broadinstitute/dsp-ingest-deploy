@@ -5,24 +5,13 @@ declare -ra JAVA_OPTS_ARRAY=(
    -Dconfig.file=/etc/application.conf
    # Constrain memory.
    -server
-   -Xmx2g
-   -Xmx2g
-   # GC settings (copied from Hamm for now).
-   -XX:NewSize=512m
-   -XX:MaxNewSize=512m
-   -XX:SurvivorRatio=8
-   -XX:+UseParNewGC
-   -XX:+UseConcMarkSweepGC
-   -XX:+CMSParallelRemarkEnabled
-   -XX:+UseCMSInitiatingOccupancyOnly
-   -XX:CMSInitiatingOccupancyFraction=60
-   -XX:+ScavengeBeforeFullGC
-   -XX:+CMSScavengeBeforeRemark
+   -Xmx512m
+   -Xmx512m
+   # GC settings (copied from Clio for now).
+   -XX:+PrintFlagsFinal
+   -XX:+PrintGCTimeStamps
    -XX:+PrintGCDateStamps
-   -verbose:gc
    -XX:+PrintGCDetails
-   -XX:+PrintClassHistogramBeforeFullGC
-   -XX:+PrintClassHistogramAfterFullGC
 )
 
 # Inject options into normal entrypoint.
