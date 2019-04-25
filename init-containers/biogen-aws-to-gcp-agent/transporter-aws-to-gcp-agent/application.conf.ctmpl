@@ -3,7 +3,7 @@
 org.broadinstitute.transporter {
 
     queue {
-        manager-uri = "transporter-manager.{{$environment}}:8080"
+        manager-uri = "http://transporter-manager.{{$environment}}:8080"
         queue-name = "biogen"
     }
 
