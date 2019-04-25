@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: cloudsql-proxy
 spec:
-  replicas: 2
+  replicas: 1
   template:
     metadata:
       labels:
@@ -12,7 +12,7 @@ spec:
       serviceAccountName: cloudsql-proxy-sa
       initContainers:
         - name: cloudsql-proxy-config
-          image: us.gcr.io/broad-dsp-monster-dev/cloudsql-proxy-config:a9a67f9
+          image: us.gcr.io/broad-dsp-monster-dev/cloudsql-proxy-config:8280e5c
           imagePullPolicy: Always
           env:
             - name: ENVIRONMENT
@@ -38,6 +38,10 @@ spec:
               memory: 16Mi
             limits:
               memory: 24Mi
+          readinessProbe:
+            tcpSocket:
+              port: 5432
+            timeoutSeconds: 1
           volumeMounts:
             - name: appdir
               mountPath: /secrets/cloudsql/credentials.json

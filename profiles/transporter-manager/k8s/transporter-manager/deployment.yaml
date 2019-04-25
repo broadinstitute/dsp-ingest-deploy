@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: transporter-manager
 spec:
-  replicas: 2
+  replicas: 1
   template:
     metadata:
       labels:
@@ -12,7 +12,7 @@ spec:
       serviceAccountName: transporter-manager-sa
       initContainers:
         - name: transporter-manager-config
-          image: us.gcr.io/broad-dsp-monster-dev/transporter-manager-config:a9a67f9
+          image: us.gcr.io/broad-dsp-monster-dev/transporter-manager-config:8280e5c
           imagePullPolicy: Always
           env:
             - name: ENVIRONMENT
@@ -42,7 +42,7 @@ spec:
               containerPort: 8080
           resources:
             requests:
-              cpu: 250m
+              cpu: 100m
               memory: 288Mi
             limits:
               memory: 304Mi

@@ -1,1 +1,1 @@
-{{with $secret := vault "secret/dsde/monster/dev/transporter/agents/tmp-writer-account.json"}}{{$secret.Data | toJSON}}{{end}}
+{{with $environment := env "ENVIRONMENT"}}{{with $secret := vault (printf "secret/dsde/monster/%s/transporter/agents/biogen-writer.json" $environment)}}{{$secret.Data | toJSON}}{{end}}{{end}}
