@@ -26,7 +26,7 @@ spec:
               mountPath: /working
       containers:
         - name: biogen-aws-to-gcp-agent
-          image: broadinstitute/transporter-aws-to-gcp-agent:bbd6634f02dc5d92ab679dcb7ade01e73b33f5c4
+          image: broadinstitute/transporter-aws-to-gcp-agent:be873c96ea7d162b665453c2b594a8c374b87a5a
           imagePullPolicy: Always
           command: [ "/bin/bash", "/etc/entrypoint.sh" ]
           lifecycle:
