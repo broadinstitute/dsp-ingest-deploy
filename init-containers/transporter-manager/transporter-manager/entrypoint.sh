@@ -5,8 +5,8 @@ declare -ra JAVA_OPTS_ARRAY=(
    -Dconfig.file=/etc/application.conf
    # Constrain memory.
    -server
-   -Xmx256m
-   -Xmx256m
+   -Xmx1g
+   -Xmx1g
    # GC settings (copied from Clio for now).
    -XX:+PrintFlagsFinal
    -XX:+PrintGCTimeStamps
