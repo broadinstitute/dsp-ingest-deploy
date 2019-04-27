@@ -12,7 +12,7 @@ spec:
       serviceAccountName: biogen-aws-to-gcp-agent-sa
       initContainers:
         - name: biogen-aws-to-gcp-agent-config
-          image: us.gcr.io/broad-dsp-monster-dev/biogen-aws-to-gcp-agent-config:f6a47bb
+          image: us.gcr.io/broad-dsp-monster-dev/biogen-aws-to-gcp-agent-config:c6fa8aa
           imagePullPolicy: Always
           env:
             - name: ENVIRONMENT
@@ -37,9 +37,9 @@ spec:
           resources:
             requests:
               cpu: 100m
-              memory: 544Mi
+              memory: 800Mi
             limits:
-              memory: 586Mi
+              memory: 832Mi
           volumeMounts:
             - name: appdir
               mountPath: /etc/application.conf
