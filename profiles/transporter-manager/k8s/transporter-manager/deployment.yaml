@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: transporter-manager
 spec:
-  replicas: 1
+  replicas: 2
   template:
     metadata:
       labels:
@@ -25,7 +25,7 @@ spec:
             - name: appdir
               mountPath: /working
         - name: transporter-manager-migrations
-          image: broadinstitute/transporter-manager-migrations:be873c96ea7d162b665453c2b594a8c374b87a5a
+          image: broadinstitute/transporter-manager-migrations:94f384f6d4eba7b400859278966fd4b06d7d5e30-SNAPSHOT
           imagePullPolicy: Always
           command: [ "/bin/bash", "/etc/entrypoint.sh", "liquibase", "update" ]
           volumeMounts:
@@ -34,7 +34,7 @@ spec:
               subPath: transporter-manager-migrations/entrypoint.sh
       containers:
         - name: transporter-manager
-          image: broadinstitute/transporter-manager:be873c96ea7d162b665453c2b594a8c374b87a5a
+          image: broadinstitute/transporter-manager:94f384f6d4eba7b400859278966fd4b06d7d5e30-SNAPSHOT
           imagePullPolicy: Always
           command: [ "/bin/bash", "/etc/entrypoint.sh" ]
           ports:
