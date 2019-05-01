@@ -1,0 +1,26 @@
+{{with $environment := env "ENVIRONMENT"}}
+{{with $s3_secret := vault (printf "secret/dsde/monster/%s/transporter/agents/ukbb-biogen" $environment)}}
+org.broadinstitute.transporter {
+
+    queue {
+        manager-uri = "http://transporter-manager.{{$environment}}:8080"
+        queue-name = "biogen"
+    }
+
+    kafka {
+        bootstrap-servers = ["bootstrap.{{$environment}}:9092"]
+        application-id = "biogen-aws-to-gcp-agent"
+    }
+
+    runner-config {
+        aws {
+            access-key-id = "{{$s3_secret.Data.aws_access_key_id}}"
+            secret-access-key = "{{$s3_secret.Data.aws_secret_access_key}}"
+        }
+
+        gcp {
+            service-account-json = "/secrets/gcs/credentials.json"
+        }
+    }
+}
+{{end}}{{end}}

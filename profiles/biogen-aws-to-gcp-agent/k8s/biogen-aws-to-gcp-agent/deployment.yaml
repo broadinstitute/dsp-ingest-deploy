@@ -1,0 +1,63 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: biogen-aws-to-gcp-agent
+spec:
+  replicas: 16
+  template:
+    metadata:
+      labels:
+        app: biogen-aws-to-gcp-agent
+    spec:
+      serviceAccountName: biogen-aws-to-gcp-agent-sa
+      initContainers:
+        - name: biogen-aws-to-gcp-agent-config
+          image: us.gcr.io/broad-dsp-monster-dev/biogen-aws-to-gcp-agent-config:bc772ee
+          imagePullPolicy: Always
+          env:
+            - name: ENVIRONMENT
+              value: dev
+            - name: VAULT_TOKEN_FILE
+              value: /etc/vault/token
+          volumeMounts:
+            - name: token
+              mountPath: /etc/vault
+            - name: appdir
+              mountPath: /working
+      containers:
+        - name: biogen-aws-to-gcp-agent
+          image: broadinstitute/transporter-aws-to-gcp-agent:94f384f6d4eba7b400859278966fd4b06d7d5e30-SNAPSHOT
+          imagePullPolicy: Always
+          command: [ "/bin/bash", "/etc/entrypoint.sh" ]
+          lifecycle:
+            preStop:
+              exec:
+                # Give the app the chance to finish any in-flight transfer.
+                command: ["sh", "-ce", "kill -s TERM 1; while $(kill -0 1 2>/dev/null); do sleep 1; done"]
+          resources:
+            requests:
+              cpu: 1000m
+              memory: 800Mi
+            limits:
+              memory: 832Mi
+          volumeMounts:
+            - name: appdir
+              mountPath: /etc/application.conf
+              subPath: transporter-aws-to-gcp-agent/application.conf
+              readOnly: true
+            - name: appdir
+              mountPath: /etc/entrypoint.sh
+              subPath: transporter-aws-to-gcp-agent/entrypoint.sh
+            - name: appdir
+              mountPath: /secrets/gcs/credentials.json
+              subPath: transporter-aws-to-gcp-agent/gcs-writer-sa.json
+      volumes:
+        - name: token
+          secret:
+            secretName: vault-token
+            items:
+              - key: token
+                path: token
+                mode: 0444
+        - name: appdir
+          emptyDir: {}
