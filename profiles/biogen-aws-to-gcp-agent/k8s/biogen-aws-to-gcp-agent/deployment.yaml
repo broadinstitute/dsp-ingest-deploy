@@ -36,10 +36,10 @@ spec:
                 command: ["sh", "-ce", "kill -s TERM 1; while $(kill -0 1 2>/dev/null); do sleep 1; done"]
           resources:
             requests:
-              cpu: 750m
-              memory: 544Mi
+              cpu: 1000m
+              memory: 800Mi
             limits:
-              memory: 576Mi
+              memory: 832Mi
           volumeMounts:
             - name: appdir
               mountPath: /etc/application.conf
