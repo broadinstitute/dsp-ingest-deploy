@@ -1,12 +1,14 @@
 #!/bin/bash
 
+declare -r HEAP_MEM=${TRANSPORTER_HEAP_SIZE:-1g}
+
 declare -ra JAVA_OPTS_ARRAY=(
+   -server
    # Point to rendered config file.
    -Dconfig.file=/etc/application.conf
    # Constrain memory.
-   -server
-   -Xmx1g
-   -Xmx1g
+   -Xmx${HEAP_MEM}
+   -Xms${HEAP_MEM}
    # GC settings (copied from Clio for now).
    -XX:+PrintFlagsFinal
    -XX:+PrintGCTimeStamps

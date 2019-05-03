@@ -1,12 +1,14 @@
 #!/bin/bash
 
+declare -r HEAP_MEM=${AGENT_HEAP_SIZE:-512m}
+
 declare -ra JAVA_OPTS_ARRAY=(
+   -server
    # Point to rendered config file.
    -Dconfig.file=/etc/application.conf
    # Constrain memory.
-   -server
-   -Xmx512m
-   -Xmx512m
+   -Xmx${HEAP_MEM}
+   -Xms${HEAP_MEM}
    # GC settings (copied from Clio for now).
    -XX:+PrintFlagsFinal
    -XX:+PrintGCTimeStamps

@@ -37,6 +37,9 @@ spec:
           image: broadinstitute/transporter-manager:8deb2badc70ec00c6a7c4560a129bd8f826ddd65
           imagePullPolicy: Always
           command: [ "/bin/bash", "/etc/entrypoint.sh" ]
+          env:
+            - name: TRANSPORTER_HEAP_SIZE
+              value: 1g
           ports:
             - name: http-port
               containerPort: 8080
