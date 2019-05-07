@@ -25,7 +25,7 @@ spec:
             - name: appdir
               mountPath: /working
         - name: transporter-manager-migrations
-          image: broadinstitute/transporter-manager-migrations:8deb2badc70ec00c6a7c4560a129bd8f826ddd65
+          image: broadinstitute/transporter-manager-migrations:b3ee89ca5664340b6ccf846229ded3078985b248
           imagePullPolicy: Always
           command: [ "/bin/bash", "/etc/entrypoint.sh", "liquibase", "update" ]
           volumeMounts:
@@ -34,7 +34,7 @@ spec:
               subPath: transporter-manager-migrations/entrypoint.sh
       containers:
         - name: transporter-manager
-          image: broadinstitute/transporter-manager:8deb2badc70ec00c6a7c4560a129bd8f826ddd65
+          image: broadinstitute/transporter-manager:b3ee89ca5664340b6ccf846229ded3078985b248
           imagePullPolicy: Always
           command: [ "/bin/bash", "/etc/entrypoint.sh" ]
           env:
