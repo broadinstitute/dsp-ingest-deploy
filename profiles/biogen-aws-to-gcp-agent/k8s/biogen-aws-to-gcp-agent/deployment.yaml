@@ -12,7 +12,7 @@ spec:
       serviceAccountName: biogen-aws-to-gcp-agent-sa
       initContainers:
         - name: biogen-aws-to-gcp-agent-config
-          image: us.gcr.io/broad-dsp-monster-dev/biogen-aws-to-gcp-agent-config:bc772ee
+          image: us.gcr.io/broad-dsp-monster-dev/biogen-aws-to-gcp-agent-config:b4d0078
           imagePullPolicy: Always
           env:
             - name: ENVIRONMENT
@@ -29,6 +29,9 @@ spec:
           image: broadinstitute/transporter-aws-to-gcp-agent:94f384f6d4eba7b400859278966fd4b06d7d5e30-SNAPSHOT
           imagePullPolicy: Always
           command: [ "/bin/bash", "/etc/entrypoint.sh" ]
+          env:
+            - name: AGENT_HEAP_SIZE
+              value: 512m
           lifecycle:
             preStop:
               exec:
