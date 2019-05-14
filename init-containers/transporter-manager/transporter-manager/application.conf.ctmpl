@@ -1,6 +1,9 @@
 {{with $environment := env "ENVIRONMENT"}}
 {{with $secret := vault (printf "secret/dsde/monster/%s/transporter/manager/cloudsql/login" $environment)}}
 org.broadinstitute.transporter {
+
+    submission-interval: 10s
+
     db {
         username = {{$secret.Data.username}}
         password = {{$secret.Data.password}}
@@ -8,8 +11,17 @@ org.broadinstitute.transporter {
     }
 
     kafka {
-        bootstrap-servers = ["bootstrap.{{$environment}}:9092"]
-        replication-factor = 3
+        connection {
+            bootstrap-servers = ["bootstrap.{{$environment}}:9092"]
+        }
+
+        admin {
+            replication-factor = 3
+        }
+
+        consumer {
+            wait-time-per-batch: 5s
+        }
     }
 }
 {{end}}{{end}}
