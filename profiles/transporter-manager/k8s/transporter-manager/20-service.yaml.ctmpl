@@ -1,10 +1,12 @@
+{{with $svc := env "SERVICE"}}
 apiVersion: v1
 kind: Service
 metadata:
-   name: transporter-manager
+   name: {{$svc}}
 spec:
   ports:
     - port: 8080
       targetPort: http-port
   selector:
-    app: transporter-manager
+    app: {{$svc}}
+{{end}}

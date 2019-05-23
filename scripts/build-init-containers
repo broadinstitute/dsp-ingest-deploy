@@ -2,8 +2,6 @@
 set -euo pipefail
 
 declare -r SCRIPT_DIR=$(cd $(dirname $0) && pwd)
-declare -r ROOT_DIR=$(dirname ${SCRIPT_DIR})
-declare -r INIT_CONTAINER_DIR=${ROOT_DIR}/init-containers
 
 # FIXME: Supposedly this should be able to point at "broad-dsp-gcr-public"
 declare -r INIT_CONTAINER_PREFIX=us.gcr.io/broad-dsp-monster-dev
@@ -25,7 +23,7 @@ function main () {
     # https://github.com/broadinstitute/dsp-k8s-deploy/blob/master/adding-a-service.md#building-and-pushing-init-container-images
     local -r version=$(git rev-parse HEAD | cut -c 1-7)
 
-    local -ra service_dirs=($(find ${INIT_CONTAINER_DIR} -depth 1 -type d))
+    local -ra service_dirs=($(find ${SCRIPT_DIR} -depth 1 -type d))
 
     for service_dir in ${service_dirs[@]}; do
         build_and_push ${service_dir} ${version}

@@ -1,0 +1,47 @@
+module "{{env "CLUSTER_NAME"}}" {
+  # terraform-shared repo
+  source = "github.com/broadinstitute/terraform-shared.git//terraform-modules/k8s?ref=k8s-0.0.4"
+  depends_on = ["module.enable-services"]
+  providers {
+    google = "google-beta"
+  }
+  # Name for your cluster (use dashes not underscores)
+  cluster_name = "{{env "CLUSTER_NAME"}}"
+
+  # Network where the cluster will live (must be full resource path)
+  cluster_network = "${google_compute_network.{{env "APPLICATION_NAME"}}-network.name}"
+
+  # Subnet where the cluster will live (must be full resource path)
+  cluster_subnetwork = "${google_compute_subnetwork.{{env "APPLICATION_NAME"}}-subnetwork.name}"
+
+  master_ipv4_cidr_block = "${var.k8s_masters_ipv4_cidr}"
+
+  private_cluster_config = [{
+    enable_private_endpoint = false
+    enable_private_nodes   = true
+    master_ipv4_cidr_block = "${var.k8s_masters_private_ipv4_cidr}"
+  }]
+
+  # CIDRs of networks allowed to talk to the k8s master
+  master_authorized_network_cidrs = "${var.broad_range_cidrs}"
+
+  #gke master verion
+  master_version = "{{env "LATEST_K8S_MASTER_VERSION"}}"
+
+  #gke node verion
+  node_version = "{{env "LATEST_K8S_NODE_VERSION"}}"
+
+  #instance size
+  node_pool_machine_type ="n1-standard-2"
+
+  # number of nodes in your node pool
+  node_pool_count = "3"
+
+  node_pool_disk_size_gb = "10"
+}
+
+resource "google_compute_global_address" "{{env "CLUSTER_NAME"}}-ip" {
+  provider = "google"
+  name = "{{env "CLUSTER_NAME"}}-100"
+  depends_on = ["module.enable-services"]
+}

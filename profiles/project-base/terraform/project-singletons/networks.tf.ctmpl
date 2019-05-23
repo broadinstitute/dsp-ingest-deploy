@@ -1,0 +1,18 @@
+resource "google_compute_network" "{{env "APPLICATION_NAME"}}-network" {
+  name                    = "{{env "APPLICATION_NAME"}}-network"
+  project                 = "{{env "GOOGLE_PROJECT"}}"
+  provider                = "google"
+  auto_create_subnetworks = "true"
+  depends_on              = ["module.enable-services"]
+}
+
+resource "google_compute_subnetwork" "{{env "APPLICATION_NAME"}}-subnetwork" {
+  name          = "{{env "APPLICATION_NAME"}}-subnetwork"
+  project       = "{{env "GOOGLE_PROJECT"}}"
+  provider      = "google"
+  region        = "{{env "GOOGLE_REGION"}}"
+  network       = "${google_compute_network.{{env "APPLICATION_NAME"}}-network.self_link}"
+  depends_on    = ["module.enable-services", "google_compute_network.{{env "APPLICATION_NAME"}}-network"]
+
+  ip_cidr_range = "10.0.0.0/22"
+}

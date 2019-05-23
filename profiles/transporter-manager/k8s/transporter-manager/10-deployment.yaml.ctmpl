@@ -1,22 +1,23 @@
+{{with $svc := env "SERVICE"}}
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: transporter-manager
+  name: {{$svc}}
 spec:
   replicas: 1
   template:
     metadata:
       labels:
-        app: transporter-manager
+        app: {{$svc}}
     spec:
-      serviceAccountName: transporter-manager-sa
+      serviceAccountName: {{$svc}}-sa
       initContainers:
-        - name: transporter-manager-config
-          image: us.gcr.io/broad-dsp-monster-dev/transporter-manager-config:ab0a48a
+        - name: {{$svc}}-config
+          image: us.gcr.io/{{env "GOOGLE_PROJECT"}}/transporter-manager-config:ab0a48a
           imagePullPolicy: Always
           env:
             - name: ENVIRONMENT
-              value: dev
+              value: {{env "ENVIRONMENT"}}
             - name: VAULT_TOKEN_FILE
               value: /etc/vault/token
           volumeMounts:
@@ -24,7 +25,7 @@ spec:
               mountPath: /etc/vault
             - name: appdir
               mountPath: /working
-        - name: transporter-manager-migrations
+        - name: {{$svc}}-migrations
           image: broadinstitute/transporter-manager-migrations:8823f590e7b3259e1751aff0a7b0c4850e953efb
           imagePullPolicy: Always
           command: [ "/bin/bash", "/etc/entrypoint.sh", "liquibase", "update" ]
@@ -33,7 +34,7 @@ spec:
               mountPath: /etc/entrypoint.sh
               subPath: transporter-manager-migrations/entrypoint.sh
       containers:
-        - name: transporter-manager
+        - name: {{$svc}}
           image: broadinstitute/transporter-manager:8823f590e7b3259e1751aff0a7b0c4850e953efb
           imagePullPolicy: Always
           command: [ "/bin/bash", "/etc/entrypoint.sh" ]
@@ -83,3 +84,4 @@ spec:
                 mode: 0444
         - name: appdir
           emptyDir: {}
+{{end}}

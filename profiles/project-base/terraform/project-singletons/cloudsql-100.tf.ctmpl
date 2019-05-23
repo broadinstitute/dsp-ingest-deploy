@@ -1,0 +1,41 @@
+resource "google_sql_database_instance" "{{env "APPLICATION_NAME"}}-postgres-100" {
+    provider = "google"
+    count = "1"
+    region = "{{env "GOOGLE_REGION"}}"
+    database_version = "POSTGRES_9_6"
+    name = "{{env "APPLICATION_NAME"}}-postgres-101"
+    depends_on = ["module.enable-services"]
+
+    settings {
+        activation_policy = "ALWAYS"
+        pricing_plan = "PER_USE"
+        replication_type = "SYNCHRONOUS"
+        tier = "db-g1-small"
+
+        backup_configuration {
+            binary_log_enabled = false
+            enabled = true
+            start_time = "06:00"
+        }
+
+        ip_configuration {
+            ipv4_enabled = true
+            require_ssl = "true"
+            authorized_networks = {
+                name = "Broad"
+                value = "${var.broad_routeable_net}"
+            }
+
+            authorized_networks = {
+                name = "kubernetes"
+                value = "${google_compute_global_address.{{env "CLUSTER_NAME"}}-ip.address}"
+            }
+        }
+
+        user_labels {
+            app = "{{env "APPLICATION_NAME"}}"
+            role = "database"
+            state = "active"
+        }
+    }
+}

@@ -1,10 +1,12 @@
+{{with $svc := env "SERVICE"}}
 apiVersion: v1
 kind: Service
 metadata:
-   name: cloudsql-proxy
+   name: {{$svc}}
 spec:
   ports:
     - port: 5432
       targetPort: db-port
   selector:
-    app: cloudsql-proxy
+    app: {{$svc}}
+{{end}}

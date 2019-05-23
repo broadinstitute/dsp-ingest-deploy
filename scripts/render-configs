@@ -1,0 +1,113 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+declare -r SCRIPT_DIR=$(cd $(dirname $0) && pwd)
+declare -r PROJECT_DIR=$(cd $(dirname ${SCRIPT_DIR}) && pwd)
+
+declare -r CONFIG_OUTPUT_DIR=${PROJECT_DIR}/rendered-output
+declare -r OUTPUT_DIR=${PROJECT_DIR}/rendered
+
+declare -r DEFAULT_OWNER=monster
+declare -r DEFAULT_REGION=us-central1
+declare -r DEFAULT_ZONE=a
+
+declare -rA VALID_ENVS=([dev]=valid [prod]=valid)
+declare -ra PROFILES=(project-base namespace)
+
+function usage () {
+    local -r retcode=$1 message=${2:-""}
+
+    if [[ ! -z "$message" ]]; then
+        2>&1 echo ${message}
+    fi
+    exit $retcode
+}
+
+function check_usage () {
+    if [[ $# -lt 2 || $# -gt 3 ]]; then
+        usage 1 "Usage: $0 <env> <owner> [<project>]"
+    elif [[ -z "${VALID_ENVS[$1]-}" ]]; then
+        usage 1 "Error: Invalid environment '$1', valid values are: ${!VALID_ENVS[@]}"
+    fi
+}
+
+function render_config () {
+    local -r env=$1 owner=$2 project=$3
+
+    local -r full_env=$([ -z "$project" ] && echo ${env} || echo ${project}-${env})
+
+    local -ra config_json=(
+        '{'
+        '  "name": "ingest",'
+        '  "intent": "Ingest deployment for '$([ -z "$project" ] && echo ${owner} || echo ${owner}-${project})' in '${env}'",'
+        '  "production": '$([ $env == prod ] && echo true || echo false)','
+        '  "stability": "'$([ $env == prod ] && echo stable || echo volatile)'",'
+        '  "environments": {'
+        '    "default": {'
+        '      "name": "'${full_env}'"'
+        '    }'
+        '  },'
+        '  "projects": {'
+        '    "default": {'
+        '      "name": "broad-dsp-monster-'${full_env}'",'
+        '      "provider_sa_path": "secret/devops/terraform/'${env}'/monster/terraform-service-account.json"'
+        '    },'
+        '    "state_bucket": {'
+        '      "provider_sa_path": "secret/dsp/service-accts/dsp-techops/terraform-state-service-account.json"'
+        '    }'
+        '  },'
+        '  "terraform_state": {'
+        '    "default": {'
+        '      "state_bucket": "broad-dsp-terraform-state",'
+        '      "state_path_prefix": "monster"'
+        '    }'
+        '  },'
+        '  "dns": {'
+        '    "default": {'
+        '      "name": "monster-'${env}'",'
+        '      "zone": "monster-'${env}'.broadinstitute.org"'
+        '    }'
+        '  },'
+        '  "regions": {'
+        '    "default": {'
+        '      "name": "'${DEFAULT_REGION}'",'
+        '      "zone_name": "'${DEFAULT_ZONE}'"'
+        '    }'
+        '  },'
+        '  "clusters": {'
+        '    "default": {'
+        '      "name": "ingest-k8s-cluster"'
+        '    }'
+        '  }'
+        '}'
+    )
+
+    echo "${config_json[*]}"
+}
+
+function render_profile () {
+    ${PROJECT_DIR}/dsp-k8s-deploy/application-render.sh \
+        -o $1 \
+        -e $2 \
+        -j $3 \
+        -p $4
+}
+
+function main () {
+    check_usage $@
+
+    local -r env=$1 owner=$2 project=${3:-}
+    local -r tmp_config=${CONFIG_OUTPUT_DIR}/${owner}-$([ -z "$project" ] && echo ${env} || echo ${project}-${env}).json
+
+    mkdir -p ${CONFIG_OUTPUT_DIR}
+    render_config ${env} ${owner} "${project}" > ${tmp_config}
+
+    rm -rf ${OUTPUT_DIR}/${owner}
+    for profile in ${PROFILES[@]}; do
+        render_profile ${owner} ${env} ${tmp_config} ${profile}
+    done
+
+    2>&1 echo Deploy configs have been rendered to ${OUTPUT_DIR}/${owner}
+}
+
+main ${@}

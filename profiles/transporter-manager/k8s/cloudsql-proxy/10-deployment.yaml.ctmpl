@@ -1,22 +1,23 @@
+{{with $svc := env "SERVICE"}}
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: cloudsql-proxy
+  name: {{$svc}}
 spec:
   replicas: 1
   template:
     metadata:
       labels:
-        app: cloudsql-proxy
+        app: {{$svc}}
     spec:
-      serviceAccountName: cloudsql-proxy-sa
+      serviceAccountName: {{$svc}}-sa
       initContainers:
-        - name: cloudsql-proxy-config
-          image: us.gcr.io/broad-dsp-monster-dev/cloudsql-proxy-config:ab0a48a
+        - name: {{$svc}}-config
+          image: us.gcr.io/{{env "GOOGLE_PROJECT"}}/cloudsql-proxy-config:ab0a48a
           imagePullPolicy: Always
           env:
             - name: ENVIRONMENT
-              value: dev
+              value: {{env "ENVIRONMENT"}}
             - name: VAULT_TOKEN_FILE
               value: /etc/vault/token
           volumeMounts:
@@ -25,7 +26,7 @@ spec:
             - name: appdir
               mountPath: /working
       containers:
-        - name: cloudsql-proxy
+        - name: {{$svc}}
           image: b.gcr.io/cloudsql-docker/gce-proxy:latest
           imagePullPolicy: Always
           command: [ "/bin/sh", "/etc/entrypoint.sh" ]
@@ -60,3 +61,4 @@ spec:
                 mode: 0444
         - name: appdir
           emptyDir: {}
+{{end}}
