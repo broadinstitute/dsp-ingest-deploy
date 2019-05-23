@@ -1,5 +1,5 @@
-{{with $environment := env "ENVIRONMENT"}}
-{{with $s3_secret := vault (printf "secret/dsde/monster/%s/transporter/agents/biogen/aws" $environment)}}
+{{with $aws_secrets_path := env "AWS_SECRETS_PATH"}}
+{{with $s3_secret := vault $aws_secrets_path}}
 org.broadinstitute.transporter {
 
     queue {
