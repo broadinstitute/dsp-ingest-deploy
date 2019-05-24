@@ -1,0 +1,1 @@
+{{with $gcs_writer_secrets_path := env "GCS_WRITER_SECRETS_PATH"}}{{with $secret := vault $gcs_writer_secrets_path}}{{$secret.Data | toJSON}}{{end}}{{end}}
