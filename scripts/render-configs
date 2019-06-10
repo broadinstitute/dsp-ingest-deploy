@@ -12,7 +12,7 @@ declare -r DEFAULT_REGION=us-central1
 declare -r DEFAULT_ZONE=a
 
 declare -rA VALID_ENVS=([dev]=valid [prod]=valid)
-declare -ra PROFILES=(project-base namespace strimzi)
+declare -ra PROFILES=(project-base namespace strimzi persistent-kafka)
 
 function usage () {
     local -r retcode=$1 message=${2:-""}
