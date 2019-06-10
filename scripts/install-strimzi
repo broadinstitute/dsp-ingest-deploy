@@ -17,7 +17,7 @@ function download_release () {
 
 function templatize_configs () {
     local -r config_dir=$1
-    local -ra to_templatize=( $(grep -r -l 'namespace: ' ${config_dir}) )
+    local -ra to_templatize=( $(find ${config_dir} -name '*.yaml' -exec  grep -r -l 'namespace: ' {} \;) )
 
     for config in ${to_templatize[@]}; do
         sed 's/namespace: .*/namespace: {{env "OWNER"}}/g' ${config} > ${config}.ctmpl

@@ -1,9 +1,16 @@
+# NOTE: This is needed because CloudSQL doesn't allow DB names to be reused
+# within the week that they're deleted, so whenever we want to tear down and
+# recreate the instance we need to generate a new name (vs waiting a week).
+resource "random_id" "{{env "APPLICATION_NAME"}}-postgres-100-randomid" {
+    byte_length = 8
+    depends_on = ["module.enable-services"]
+}
+
 resource "google_sql_database_instance" "{{env "APPLICATION_NAME"}}-postgres-100" {
     provider = "google"
-    count = "1"
     region = "{{env "GOOGLE_REGION"}}"
     database_version = "POSTGRES_9_6"
-    name = "{{env "APPLICATION_NAME"}}-postgres-101"
+    name = "${format("{{env "APPLICATION_NAME"}}-postgres-101-%s", random_id.{{env "APPLICATION_NAME"}}-postgres-100-randomid.hex)}"
     depends_on = ["module.enable-services"]
 
     settings {
