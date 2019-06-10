@@ -4,7 +4,7 @@ set -euo pipefail
 declare -r SCRIPT_DIR=$(cd $(dirname $0) && pwd)
 declare -r PROJECT_DIR=$(cd $(dirname ${SCRIPT_DIR}) && pwd)
 
-declare -r CONFIG_OUTPUT_DIR=${PROJECT_DIR}/rendered-output
+declare -r CONFIG_OUTPUT_DIR=${PROJECT_DIR}/configs
 declare -r OUTPUT_DIR=${PROJECT_DIR}/rendered
 
 declare -r DEFAULT_OWNER=monster
@@ -12,7 +12,7 @@ declare -r DEFAULT_REGION=us-central1
 declare -r DEFAULT_ZONE=a
 
 declare -rA VALID_ENVS=([dev]=valid [prod]=valid)
-declare -ra PROFILES=(project-base namespace)
+declare -ra PROFILES=(project-base namespace strimzi)
 
 function usage () {
     local -r retcode=$1 message=${2:-""}
