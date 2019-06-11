@@ -14,13 +14,19 @@ DEFAULT_ZONE = 'a'
 
 def build_parser():
     parser = argparse.ArgumentParser(description='Run a deployment command on ingest configs.')
-    parser.add_argument('--env', dest='env', choices=['dev', 'prod'], required=True)
-    parser.add_argument('--owner', dest='owner', required=True)
-    parser.add_argument('--project', dest='project', default=None)
-    parser.add_argument('--profile', dest='profile', required=True,
-        choices=['project-base', 'namespace', 'strimzi', 'persistent-kafka'])
-    parser.add_argument('--command', dest='command', required=True,
-        choices=['render', 'deploy', 'teardown'])
+    parser.add_argument('-e', '--env', dest='env',
+        help='Top-level environment to operate against.',
+        choices=['dev', 'prod'], required=True)
+    parser.add_argument('-o', '--owner', dest='owner',
+        help='User (or team) name to namespace terraform state and k8s deployments under.',
+        default='monster')
+    parser.add_argument('-i', '--ingest-project', dest='ingest_project',
+        help='Optional refinement of the environment to point at a specific project (i.e. "v2f").',
+        default=None)
+    parser.add_argument('-p', '--profile', dest='profile', required=True,
+        help='Collection of configs / templates to operate against.',
+        choices=[d.name for d in (PROJECT_DIR / 'profiles').iterdir() if d.is_dir()])
+    parser.add_argument('command', choices=['render', 'deploy', 'teardown'], help='Command to run.')
     return parser
 
 
@@ -91,7 +97,7 @@ def run_command(args, config):
 def main():
     parser = build_parser()
     args = parser.parse_args()
-    run_command(args, generate_config(args.env, args.owner, args.project))
+    run_command(args, generate_config(args.env, args.owner, args.ingest_project))
 
 
 if __name__ == '__main__':
