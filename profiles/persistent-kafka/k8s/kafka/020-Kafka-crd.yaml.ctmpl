@@ -20,12 +20,14 @@ spec:
       - id: 0
         type: persistent-claim
         size: 10Gi
+        class: kafka-storage
         deleteClaim: false
   zookeeper:
     replicas: 3
     storage:
       type: persistent-claim
       size: 10Gi
+      class: zookeeper-storage
       deleteClaim: false
   entityOperator:
     topicOperator: {}
