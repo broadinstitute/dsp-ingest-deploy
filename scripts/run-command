@@ -1,0 +1,98 @@
+#!/usr/bin/env python3
+
+import argparse
+import json
+from pathlib import Path
+import subprocess
+import sys
+import tempfile
+
+PROJECT_DIR = Path(__file__).resolve().parents[1]
+
+DEFAULT_REGION = 'us-central1'
+DEFAULT_ZONE = 'a'
+
+def build_parser():
+    parser = argparse.ArgumentParser(description='Run a deployment command on ingest configs.')
+    parser.add_argument('--env', dest='env', choices=['dev', 'prod'], required=True)
+    parser.add_argument('--owner', dest='owner', required=True)
+    parser.add_argument('--project', dest='project', default=None)
+    parser.add_argument('--profile', dest='profile', required=True,
+        choices=['project-base', 'namespace', 'strimzi', 'persistent-kafka'])
+    parser.add_argument('--command', dest='command', required=True,
+        choices=['render', 'deploy', 'teardown'])
+    return parser
+
+
+def generate_config(env, owner, project=None):
+    full_env = f'{project}-{env}' if project else env
+    return {
+        'name': 'ingest',
+        'intent': f'Ingest deployment for {owner} in {full_env}',
+        'production': env == 'prod',
+        'stability': 'stable' if env == 'prod' else 'volatile',
+        'environments': {
+            'default': {
+                'name': full_env
+            }
+        },
+        'projects': {
+            'default': {
+                'name': f'broad-dsp-monster-{full_env}',
+                'provider_sa_path': f'secret/devops/terraform/{env}/monster/terraform-service-account.json'
+            },
+            'state_bucket': {
+                'provider_sa_path': 'secret/dsp/service-accts/dsp-techops/terraform-state-service-account.json'
+            }
+        },
+        'terraform_state': {
+            'default': {
+                'state_bucket': 'broad-dsp-terraform-state',
+                'state_path_prefix': 'monster'
+            }
+        },
+        'dns': {
+            'default': {
+                'name': f'monster-{env}',
+                'zone': f'monster-{env}.broadinstitute.org'
+            }
+        },
+        'regions': {
+            'default': {
+                'name': DEFAULT_REGION,
+                'zone_name': DEFAULT_ZONE
+            }
+        },
+        'clusters': {
+            'default': {
+                'name': 'ingest-k8s-cluster'
+            }
+        }
+    }
+
+
+def run_command(args, config):
+    config_string = json.dumps(config, indent=2)
+    print(f"Running '{args.command}' on profile '{args.profile}' with config:\n{config_string}")
+
+    with tempfile.NamedTemporaryFile() as tmp:
+        tmp.write(config_string.encode('utf-8'))
+        tmp.flush()
+
+        subprocess.run([
+            (PROJECT_DIR / 'dsp-k8s-deploy' / f'application-{args.command}.sh').as_posix(),
+            '-o', args.owner,
+            '-e', args.env,
+            '-j', tmp.name,
+            '-p', args.profile
+        ])
+
+
+def main():
+    parser = build_parser()
+    args = parser.parse_args()
+    run_command(args, generate_config(args.env, args.owner, args.project))
+
+
+if __name__ == '__main__':
+    main()
