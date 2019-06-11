@@ -18,7 +18,7 @@ function download_release () {
     local -r uri="https://github.com/strimzi/strimzi-kafka-operator/releases/download/${version}/strimzi-${version}.tar.gz"
 
     mkdir -p ${output}
-    curl -sL ${uri} | tar xzf - --directory ${output} --strip-components 2 strimzi-${version}/install
+    curl -sL ${uri} | tar xzf - --directory ${output} --strip-components 2 strimzi-${version}/install/cluster-operator
 }
 
 function templatize_configs () {

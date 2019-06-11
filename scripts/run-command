@@ -3,6 +3,7 @@
 import argparse
 import json
 from pathlib import Path
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -80,6 +81,7 @@ def generate_config(env, owner, project=None):
 def run_command(args, config):
     config_string = json.dumps(config, indent=2)
     print(f"Running '{args.command}' on profile '{args.profile}' with config:\n{config_string}")
+    shutil.rmtree((PROJECT_DIR / 'rendered' / args.owner / args.profile).as_posix())
 
     with tempfile.NamedTemporaryFile() as tmp:
         tmp.write(config_string.encode('utf-8'))
