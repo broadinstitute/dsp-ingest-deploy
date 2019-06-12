@@ -32,22 +32,22 @@ def build_parser():
     return parser
 
 
-def generate_config(env, owner, project=None):
-    full_env = f'{project}-{env}' if project else env
+def generate_config(args):
+    full_env = f'{args.ingest_project}-{args.env}' if args.ingest_project else args.env
     return {
         'name': 'ingest',
-        'intent': f'Ingest deployment for {owner} in {full_env}',
-        'production': env == 'prod',
-        'stability': 'stable' if env == 'prod' else 'volatile',
+        'intent': f'Ingest deployment for {args.owner} in {full_env}',
+        'production': args.env == 'prod',
+        'stability': 'stable' if args.env == 'prod' else 'volatile',
         'environments': {
             'default': {
-                'name': env
+                'name': args.env
             }
         },
         'projects': {
             'default': {
                 'name': f'broad-dsp-monster-{full_env}',
-                'provider_sa_path': f'secret/devops/terraform/{env}/monster/terraform-service-account.json'
+                'provider_sa_path': f'secret/devops/terraform/{args.env}/monster/terraform-service-account.json'
             },
             'state_bucket': {
                 'provider_sa_path': 'secret/dsp/service-accts/dsp-techops/terraform-state-service-account.json'
@@ -61,8 +61,8 @@ def generate_config(env, owner, project=None):
         },
         'dns': {
             'default': {
-                'name': f'monster-{env}',
-                'zone': f'monster-{env}.broadinstitute.org'
+                'name': f'monster-{args.env}',
+                'zone': f'monster-{args.env}.broadinstitute.org'
             }
         },
         'regions': {
@@ -75,11 +75,19 @@ def generate_config(env, owner, project=None):
             'default': {
                 'name': 'ingest-k8s-cluster'
             }
+        },
+        'profile_vars': {
+            args.profile: {
+                'env': {
+                    'INGEST_PROJECT': args.ingest_project if args.ingest_project else 'core'
+                }
+            }
         }
     }
 
 
-def run_command(args, config):
+def run_command(args):
+    config = generate_config(args)
     config_string = json.dumps(config, indent=2)
     print(f"Running '{args.command}' on profile '{args.profile}' with config:\n{config_string}")
 
@@ -91,25 +99,19 @@ def run_command(args, config):
         tmp.write(config_string.encode('utf-8'))
         tmp.flush()
 
-        command = [
+        subprocess.run([
             (PROJECT_DIR / 'dsp-k8s-deploy' / f'application-{args.command}.sh').as_posix(),
             '-o', args.owner,
             '-e', args.env,
             '-j', tmp.name,
             '-p', args.profile
-        ]
-        # No official way to thread this through the common dsp-k8s deploy mechanisms for now,
-        # so we manually inject it as an env variable.
-        env=dict(os.environ)
-        env['INGEST_PROJECT'] = args.ingest_project if args.ingest_project else 'core'
-
-        subprocess.run(command, env=env)
+        ])
 
 
 def main():
     parser = build_parser()
     args = parser.parse_args()
-    run_command(args, generate_config(args.env, args.owner, args.ingest_project))
+    run_command(args)
 
 
 if __name__ == '__main__':
