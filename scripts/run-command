@@ -2,6 +2,7 @@
 
 import argparse
 import json
+import os
 from pathlib import Path
 import shutil
 import subprocess
@@ -40,7 +41,7 @@ def generate_config(env, owner, project=None):
         'stability': 'stable' if env == 'prod' else 'volatile',
         'environments': {
             'default': {
-                'name': full_env
+                'name': env
             }
         },
         'projects': {
@@ -81,19 +82,28 @@ def generate_config(env, owner, project=None):
 def run_command(args, config):
     config_string = json.dumps(config, indent=2)
     print(f"Running '{args.command}' on profile '{args.profile}' with config:\n{config_string}")
-    shutil.rmtree((PROJECT_DIR / 'rendered' / args.owner / args.profile).as_posix())
+
+    render_target = (PROJECT_DIR / 'rendered' / args.owner / args.profile)
+    if render_target.is_dir():
+        shutil.rmtree(render_target.as_posix())
 
     with tempfile.NamedTemporaryFile() as tmp:
         tmp.write(config_string.encode('utf-8'))
         tmp.flush()
 
-        subprocess.run([
+        command = [
             (PROJECT_DIR / 'dsp-k8s-deploy' / f'application-{args.command}.sh').as_posix(),
             '-o', args.owner,
             '-e', args.env,
             '-j', tmp.name,
             '-p', args.profile
-        ])
+        ]
+        # No official way to thread this through the common dsp-k8s deploy mechanisms for now,
+        # so we manually inject it as an env variable.
+        env=dict(os.environ)
+        env['INGEST_PROJECT'] = args.ingest_project if args.ingest_project else 'core'
+
+        subprocess.run(command, env=env)
 
 
 def main():

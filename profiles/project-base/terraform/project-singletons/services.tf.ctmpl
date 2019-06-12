@@ -18,6 +18,7 @@ module "enable-services" {
     "replicapoolupdater.googleapis.com",
     "resourceviews.googleapis.com",
     "runtimeconfig.googleapis.com",
+    "sqladmin.googleapis.com",
     "sql-component.googleapis.com",
     "stackdriver.googleapis.com",
     "storage-api.googleapis.com",

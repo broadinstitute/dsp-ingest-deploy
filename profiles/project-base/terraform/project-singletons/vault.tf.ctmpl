@@ -1,0 +1,4 @@
+provider "vault" {
+    address = "{{env "VAULT_ADDR"}}"
+    token = "{{env "VAULT_TOKEN"}}"
+}
