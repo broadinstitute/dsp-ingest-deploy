@@ -1,0 +1,29 @@
+resource "google_sql_database" "{{env "OWNER"}}-{{env "APPLICATION_NAME"}}-db" {
+    name = "{{env "APPLICATION_NAME"}}-db"
+    project = "{{env "GOOGLE_PROJECT"}}"
+    instance = "${google_sql_database_instance.{{env "APPLICATION_NAME"}}-postgres-100.name}"
+    charset = "UTF8"
+    collation = "en_US.UTF8"
+}
+
+resource "random_id" "{{env "OWNER"}}-{{env "APPLICATION_NAME"}}-db-password" {
+    byte_length = 16
+}
+
+resource "google_sql_user" "{{env "OWNER"}}-{{env "APPLICATION_NAME"}}-db-user" {
+    name = "{{env "OWNER"}}"
+    password = "${random_id.{{env "OWNER"}}-{{env "APPLICATION_NAME"}}-db-password.hex}"
+    project = "{{env "GOOGLE_PROJECT"}}"
+    instance = "${google_sql_database_instance.{{env "APPLICATION_NAME"}}-postgres-100.name}"
+}
+
+resource "vault_generic_secret" "{{env "OWNER"}}-{{env "APPLICATION_NAME"}}-db-login-secret" {
+    path = "secret/dsde/monster/{{env "ENVIRONMENT"}}/{{env "APPLICATION_NAME"}}/{{env "INGEST_PROJECT"}}/cloudsql/logins/{{env "OWNER"}}"
+    data_json = <<EOT
+{
+    "db_name": "${google_sql_database.{{env "OWNER"}}-{{env "APPLICATION_NAME"}}-db.name}",
+    "username": "${google_sql_user.{{env "OWNER"}}-{{env "APPLICATION_NAME"}}-db-user.name}",
+    "password": "${google_sql_user.{{env "OWNER"}}-{{env "APPLICATION_NAME"}}-db-user.password}"
+}
+EOT
+}
