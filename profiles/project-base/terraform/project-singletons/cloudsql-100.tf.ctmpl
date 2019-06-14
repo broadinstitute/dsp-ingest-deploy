@@ -51,6 +51,7 @@ resource "vault_generic_secret" "{{env "APPLICATION_NAME"}}-postgres-100-instanc
     path = "secret/dsde/monster/{{env "ENVIRONMENT"}}/{{env "APPLICATION_NAME"}}/{{env "INGEST_PROJECT"}}/cloudsql/instance"
     data_json = <<EOT
 {
+    "name": "${google_sql_database_instance.{{env "APPLICATION_NAME"}}-postgres-100.name}",
     "connection_name": "${google_sql_database_instance.{{env "APPLICATION_NAME"}}-postgres-100.connection_name}"
 }
 EOT
