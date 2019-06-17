@@ -21,8 +21,6 @@ $ ./scripts/run-command -h
 Some deployment profiles only make sense for certain ingest use-cases, but a common set are needed to
 support the rest:
 1. [project-base](profiles/project-base/README.md)
-2. [namespace](profiles/namespace/README.md)
-3. [strimzi](profiles/strimzi/README.md)
-4. [persistent-kafka](profiles/persistent-kafka/README.md)
+2. [user-base](profiles/user-base/README.md)
 
 Run the `deploy` command of `./scripts/run-command` on these profiles in order to initialize a new project.

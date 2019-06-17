@@ -4,7 +4,7 @@ set -euo pipefail
 declare -r SCRIPT_DIR=$(cd $(dirname $0) && pwd)
 declare -r PROJECT_DIR=$(cd $(dirname ${SCRIPT_DIR}) && pwd)
 
-declare -r STRIMZI_PROFILE=${PROJECT_DIR}/profiles/strimzi/k8s
+declare -r STRIMZI_PROFILE=${PROJECT_DIR}/profiles/user-base/k8s/strimzi-cluster-operator
 
 function check_usage () {
     if [ $# -ne 1 ]; then
@@ -18,7 +18,7 @@ function download_release () {
     local -r uri="https://github.com/strimzi/strimzi-kafka-operator/releases/download/${version}/strimzi-${version}.tar.gz"
 
     mkdir -p ${output}
-    curl -sL ${uri} | tar xzf - --directory ${output} --strip-components 2 strimzi-${version}/install/cluster-operator
+    curl -sL ${uri} | tar xzf - --directory ${output} --strip-components 3 strimzi-${version}/install/cluster-operator
 }
 
 function templatize_configs () {
