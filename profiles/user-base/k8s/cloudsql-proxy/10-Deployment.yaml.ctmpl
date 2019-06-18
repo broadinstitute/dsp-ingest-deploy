@@ -1,0 +1,66 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: cloudsql-proxy
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: cloudsql-proxy
+    spec:
+      serviceAccountName: cloudsql-proxy-sa
+      initContainers:
+        - name: cloudsql-proxy-config
+          image: us.gcr.io/broad-dsp-gcr-public/cloudsql-proxy-config:ab0a48a
+          imagePullPolicy: Always
+          env:
+            - name: ENVIRONMENT
+              value: {{env "ENVIRONMENT"}}
+            - name: VAULT_TOKEN_FILE
+              value: /etc/vault/token
+            - name: INSTANCE_VAULT_PATH
+              value: secret/dsde/monster/{{env "ENVIRONMENT"}}/{{env "APPLICATION_NAME"}}/{{env "INGEST_PROJECT"}}/cloudsql/instance
+            - name: SA_VAULT_PATH
+              value: secret/dsde/monster/{{env "ENVIRONMENT"}}/{{env "APPLICATION_NAME"}}/{{env "INGEST_PROJECT"}}/cloudsql/proxy-sa-key
+          volumeMounts:
+            - name: token
+              mountPath: /etc/vault
+            - name: appdir
+              mountPath: /working
+      containers:
+        - name: cloudsql-proxy
+          image: b.gcr.io/cloudsql-docker/gce-proxy:latest
+          imagePullPolicy: Always
+          command: [ "/bin/sh", "/etc/entrypoint.sh" ]
+          ports:
+            - name: db-port
+              containerPort: 5432
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              memory: 24Mi
+          readinessProbe:
+            tcpSocket:
+              port: 5432
+            timeoutSeconds: 1
+          volumeMounts:
+            - name: appdir
+              mountPath: /secrets/cloudsql/credentials.json
+              subPath: cloudsql-proxy/cloudsql-proxy-sa.json
+              readOnly: true
+            - name: appdir
+              mountPath: /etc/entrypoint.sh
+              subPath: cloudsql-proxy/entrypoint.sh
+      volumes:
+        - name: token
+          secret:
+            secretName: vault-token
+            items:
+              - key: token
+                path: token
+                mode: 0444
+        - name: appdir
+          emptyDir: {}
