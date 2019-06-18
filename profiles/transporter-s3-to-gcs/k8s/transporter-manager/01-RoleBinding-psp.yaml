@@ -1,13 +1,11 @@
-{{with $svc := env "SERVICE"}}
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: {{$svc}}-use-pod-security-policy
+  name: transporter-manager-sa-use-pod-security-policy
 subjects:
   - kind: ServiceAccount
-    name: {{$svc}}-sa
+    name: transporter-manager-sa
 roleRef:
   kind: Role
   name: use-pod-security-policy-role
   apiGroup: rbac.authorization.k8s.io
-{{end}}
