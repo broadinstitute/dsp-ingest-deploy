@@ -1,33 +1,44 @@
+{{with $env := env "ENVIRONMENT"}}{{with $app := env "APPLICATION_NAME"}}{{with $project := env "PROJECT"}}
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: biogen-aws-to-gcp-agent
+  name: transporter-agent
 spec:
-  replicas: 1
+  replicas: 4
   template:
     metadata:
       labels:
-        app: biogen-aws-to-gcp-agent
+        app: transporter-agent
     spec:
-      serviceAccountName: biogen-aws-to-gcp-agent-sa
+      serviceAccountName: transporter-agent-sa
       initContainers:
         - name: transporter-aws-to-gcp-agent-config
           image: us.gcr.io/broad-dsp-monster-dev/transporter-aws-to-gcp-agent-config:ab0a48a
           imagePullPolicy: Always
           env:
-            - name: AWS_SECRETS_PATH  
-              value: /secret/dsde/monster/dev/transporter/agents/biogen/aws
-            - name: GCS_WRITER_SECRETS_PATH  
-              value: /secret/dsde/monster/dev/transporter/agents/biogen/writer-sa.json
             - name: VAULT_TOKEN_FILE
               value: /etc/vault/token
+            - name: AWS_SECRETS_PATH
+              value: secret/dsde/monster/{{$env}}/{{$app}}/{{$project}}/transporter/aws
+            - name: GCS_WRITER_SA_PATH
+              value: secret/dsde/monster/{{$env}}/{{$app}}/{{$project}}/transporter/gcs-writer-sa-key
+            - name: BOOTSTRAP_SERVICE
+              value: {{$app}}-cluster-kafka-bootstrap
+            - name: NAMESPACE
+              value: {{env "OWNER"}}
+            - name: REQUEST_TOPIC
+              value: transporter.requests
+            - name: PROGRESS_TOPIC
+              value: transporter.progress
+            - name: RESULT_TOPIC
+              value: transporter.results
           volumeMounts:
             - name: token
               mountPath: /etc/vault
             - name: appdir
               mountPath: /working
       containers:
-        - name: biogen-aws-to-gcp-agent
+        - name: v2f-aws-to-gcp-agent
           image: broadinstitute/transporter-aws-to-gcp-agent:8823f590e7b3259e1751aff0a7b0c4850e953efb
           imagePullPolicy: Always
           command: [ "/bin/bash", "/etc/entrypoint.sh" ]
@@ -66,3 +77,4 @@ spec:
                 mode: 0444
         - name: appdir
           emptyDir: {}
+{{end}}{{end}}{{end}}

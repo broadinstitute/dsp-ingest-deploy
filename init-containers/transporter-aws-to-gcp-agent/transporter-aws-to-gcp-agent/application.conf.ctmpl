@@ -1,15 +1,15 @@
-{{with $aws_secrets_path := env "AWS_SECRETS_PATH"}}
-{{with $s3_secret := vault $aws_secrets_path}}
+{{with $aws_secrets_path := env "AWS_SECRETS_PATH"}}{{with $s3_secret := vault $aws_secrets_path}}
 org.broadinstitute.transporter {
 
-    queue {
-        manager-uri = "http://transporter-manager.{{$environment}}:8080"
-        queue-name = "biogen"
-    }
-
     kafka {
-        bootstrap-servers = ["bootstrap.{{$environment}}:9092"]
-        application-id = "biogen-aws-to-gcp-agent"
+        bootstrap-servers = ["{{env "BOOTSTRAP_SERVICE"}}.{{env "NAMESPACE"}}:9092"]
+        application-id = "{{env "NAMESPACE"}}-transporter-agent"
+
+        topics {
+            request-topic = "{{env "REQUEST_TOPIC"}}"
+            progress-topic = "{{env "PROGRESS_TOPIC"}}"
+            result-topic = "{{env "RESULT_TOPIC"}}"
+        }
     }
 
     runner-config {

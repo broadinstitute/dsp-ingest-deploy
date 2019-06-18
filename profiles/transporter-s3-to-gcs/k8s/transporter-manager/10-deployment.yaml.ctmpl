@@ -14,7 +14,7 @@ spec:
       initContainers:
         - name: transporter-manager-config
           image: us.gcr.io/broad-dsp-gcr-public/transporter-manager-config:ba6da60
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           env:
             - name: ENVIRONMENT
               value: {{$env}}
@@ -39,7 +39,7 @@ spec:
               mountPath: /working
         - name: transporter-manager-migrations
           image: broadinstitute/transporter-manager-migrations:8958bf4fc5c4fcac29a067a202890a5fcabd0e37
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           command: [ "/bin/bash", "/etc/entrypoint.sh", "liquibase", "update" ]
           volumeMounts:
             - name: appdir
@@ -48,7 +48,7 @@ spec:
       containers:
         - name: transporter-manager
           image: broadinstitute/transporter-manager:8958bf4fc5c4fcac29a067a202890a5fcabd0e37
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           command: [ "/bin/bash", "/etc/entrypoint.sh" ]
           env:
             - name: TRANSPORTER_HEAP_SIZE
