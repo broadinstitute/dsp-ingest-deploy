@@ -1,13 +1,12 @@
 #!/bin/bash
 
-{{with $environment := env "ENVIRONMENT"}}
-{{with $secret := vault (printf "secret/dsde/monster/%s/transporter/manager/cloudsql/login" $environment)}}
+{{with $path := env "SQL_LOGIN_PATH"}}{{with $secret := vault $path}}{{with $ns := env "NAMESPACE"}}
 
-declare -r LIQUIBASE_HOST=cloudsql-proxy.{{$environment}}
+declare -r LIQUIBASE_HOST=cloudsql-proxy.{{$ns}}
 declare -r LIQUIBASE_DATABASE={{$secret.Data.db_name}}
 declare -r LIQUIBASE_USERNAME={{$secret.Data.username}}
 declare -r LIQUIBASE_PASSWORD={{$secret.Data.password}}
 
 exec /usr/local/bin/entrypoint.sh ${@}
 
-{{end}}{{end}}
+{{end}}{{end}}{{end}}

@@ -13,7 +13,7 @@ spec:
       serviceAccountName: {{$svc}}-sa
       initContainers:
         - name: {{$svc}}-config
-          image: us.gcr.io/broad-dsp-gcr-public/transporter-manager-config:ab0a48a
+          image: us.gcr.io/broad-dsp-gcr-public/transporter-manager-config:3530a92
           imagePullPolicy: Always
           env:
             - name: ENVIRONMENT
