@@ -1,0 +1,9 @@
+apiVersion: kafka.strimzi.io/v1beta1
+kind: KafkaTopic
+metadata:
+  name: transporter.requests
+  labels:
+    strimzi.io/cluster: {{env "APPLICATION_NAME"}}-cluster
+spec:
+  partitions: 4
+  replicas: 2

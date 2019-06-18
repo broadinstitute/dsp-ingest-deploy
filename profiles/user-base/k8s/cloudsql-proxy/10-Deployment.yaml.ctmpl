@@ -1,34 +1,37 @@
-{{with $svc := env "SERVICE"}}
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: {{$svc}}
+  name: cloudsql-proxy
 spec:
   replicas: 1
   template:
     metadata:
       labels:
-        app: {{$svc}}
+        app: cloudsql-proxy
     spec:
-      serviceAccountName: {{$svc}}-sa
+      serviceAccountName: cloudsql-proxy-sa
       initContainers:
-        - name: {{$svc}}-config
-          image: us.gcr.io/{{env "GOOGLE_PROJECT"}}/cloudsql-proxy-config:ab0a48a
-          imagePullPolicy: Always
+        - name: cloudsql-proxy-config
+          image: us.gcr.io/broad-dsp-gcr-public/cloudsql-proxy-config:ee7998e
+          imagePullPolicy: IfNotPresent
           env:
             - name: ENVIRONMENT
               value: {{env "ENVIRONMENT"}}
             - name: VAULT_TOKEN_FILE
               value: /etc/vault/token
+            - name: INSTANCE_VAULT_PATH
+              value: secret/dsde/monster/{{env "ENVIRONMENT"}}/{{env "APPLICATION_NAME"}}/{{env "INGEST_PROJECT"}}/cloudsql/instance
+            - name: SA_VAULT_PATH
+              value: secret/dsde/monster/{{env "ENVIRONMENT"}}/{{env "APPLICATION_NAME"}}/{{env "INGEST_PROJECT"}}/cloudsql/proxy-sa-key
           volumeMounts:
             - name: token
               mountPath: /etc/vault
             - name: appdir
               mountPath: /working
       containers:
-        - name: {{$svc}}
+        - name: cloudsql-proxy
           image: b.gcr.io/cloudsql-docker/gce-proxy:latest
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           command: [ "/bin/sh", "/etc/entrypoint.sh" ]
           ports:
             - name: db-port
@@ -61,4 +64,3 @@ spec:
                 mode: 0444
         - name: appdir
           emptyDir: {}
-{{end}}

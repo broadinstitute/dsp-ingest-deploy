@@ -1,32 +1,44 @@
-{{with $svc := env "SERVICE"}}
+{{with $env := env "ENVIRONMENT"}}{{with $app := env "APPLICATION_NAME"}}{{with $owner := env "OWNER"}}
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: {{$svc}}
+  name: transporter-manager
 spec:
   replicas: 1
   template:
     metadata:
       labels:
-        app: {{$svc}}
+        app: transporter-manager
     spec:
-      serviceAccountName: {{$svc}}-sa
+      serviceAccountName: transporter-manager-sa
       initContainers:
-        - name: {{$svc}}-config
-          image: us.gcr.io/{{env "GOOGLE_PROJECT"}}/transporter-manager-config:ab0a48a
+        - name: transporter-manager-config
+          image: us.gcr.io/broad-dsp-gcr-public/transporter-manager-config:ba6da60
           imagePullPolicy: Always
           env:
             - name: ENVIRONMENT
-              value: {{env "ENVIRONMENT"}}
+              value: {{$env}}
             - name: VAULT_TOKEN_FILE
               value: /etc/vault/token
+            - name: SQL_LOGIN_PATH
+              value: secret/dsde/monster/{{$env}}/{{$app}}/{{env "INGEST_PROJECT"}}/cloudsql/logins/{{$owner}}
+            - name: NAMESPACE
+              value: {{$owner}}
+            - name: BOOTSTRAP_SERVICE
+              value: {{$app}}-cluster-kafka-bootstrap
+            - name: REQUEST_TOPIC
+              value: transporter.requests
+            - name: PROGRESS_TOPIC
+              value: transporter.progress
+            - name: RESULT_TOPIC
+              value: transporter.results
           volumeMounts:
             - name: token
               mountPath: /etc/vault
             - name: appdir
               mountPath: /working
-        - name: {{$svc}}-migrations
-          image: broadinstitute/transporter-manager-migrations:8823f590e7b3259e1751aff0a7b0c4850e953efb
+        - name: transporter-manager-migrations
+          image: broadinstitute/transporter-manager-migrations:8958bf4fc5c4fcac29a067a202890a5fcabd0e37
           imagePullPolicy: Always
           command: [ "/bin/bash", "/etc/entrypoint.sh", "liquibase", "update" ]
           volumeMounts:
@@ -34,8 +46,8 @@ spec:
               mountPath: /etc/entrypoint.sh
               subPath: transporter-manager-migrations/entrypoint.sh
       containers:
-        - name: {{$svc}}
-          image: broadinstitute/transporter-manager:8823f590e7b3259e1751aff0a7b0c4850e953efb
+        - name: transporter-manager
+          image: broadinstitute/transporter-manager:8958bf4fc5c4fcac29a067a202890a5fcabd0e37
           imagePullPolicy: Always
           command: [ "/bin/bash", "/etc/entrypoint.sh" ]
           env:
@@ -84,4 +96,4 @@ spec:
                 mode: 0444
         - name: appdir
           emptyDir: {}
-{{end}}
+{{end}}{{end}}{{end}}

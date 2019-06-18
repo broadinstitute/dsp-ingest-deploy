@@ -2,13 +2,14 @@
 set -euo pipefail
 
 declare -r SCRIPT_DIR=$(cd $(dirname $0) && pwd)
+declare -r PROJECT_DIR=$(dirname ${SCRIPT_DIR})
 
-# FIXME: Supposedly this should be able to point at "broad-dsp-gcr-public"
-declare -r INIT_CONTAINER_PREFIX=us.gcr.io/broad-dsp-monster-dev
+declare -ra INIT_CONTAINER_SERVICES=(cloudsql-proxy transporter-manager)
+declare -r INIT_CONTAINER_PREFIX=us.gcr.io/broad-dsp-gcr-public
 
 function build_and_push () {
-    local -r service_dir=$1 version=$2
-    local -r service_name=$(basename ${service_dir})
+    local -r service_name=$1 version=$2
+    local -r service_dir=${PROJECT_DIR}/init-containers/${service_name}
     local -r service_tag="${INIT_CONTAINER_PREFIX}/${service_name}-config:${version}"
 
     docker build -t ${service_tag} ${service_dir}
@@ -16,17 +17,12 @@ function build_and_push () {
 }
 
 function main () {
-    trap "cd $(pwd)" EXIT
-    cd ${ROOT_DIR}
-
     # Init containers should use first 7 chars of git hash for their tag.
     # https://github.com/broadinstitute/dsp-k8s-deploy/blob/master/adding-a-service.md#building-and-pushing-init-container-images
     local -r version=$(git rev-parse HEAD | cut -c 1-7)
 
-    local -ra service_dirs=($(find ${SCRIPT_DIR} -depth 1 -type d))
-
-    for service_dir in ${service_dirs[@]}; do
-        build_and_push ${service_dir} ${version}
+    for service_name in ${INIT_CONTAINER_SERVICES[@]}; do
+        build_and_push ${service_name} ${version}
     done
 }
 
