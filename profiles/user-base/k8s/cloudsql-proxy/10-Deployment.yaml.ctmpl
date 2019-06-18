@@ -12,8 +12,8 @@ spec:
       serviceAccountName: cloudsql-proxy-sa
       initContainers:
         - name: cloudsql-proxy-config
-          image: us.gcr.io/broad-dsp-gcr-public/cloudsql-proxy-config:ab0a48a
-          imagePullPolicy: Always
+          image: us.gcr.io/broad-dsp-gcr-public/cloudsql-proxy-config:ee7998e
+          imagePullPolicy: IfNotPresent
           env:
             - name: ENVIRONMENT
               value: {{env "ENVIRONMENT"}}
@@ -31,7 +31,7 @@ spec:
       containers:
         - name: cloudsql-proxy
           image: b.gcr.io/cloudsql-docker/gce-proxy:latest
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           command: [ "/bin/sh", "/etc/entrypoint.sh" ]
           ports:
             - name: db-port
