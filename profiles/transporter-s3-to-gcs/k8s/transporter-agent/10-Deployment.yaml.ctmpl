@@ -13,8 +13,8 @@ spec:
       serviceAccountName: transporter-agent-sa
       initContainers:
         - name: transporter-aws-to-gcp-agent-config
-          image: us.gcr.io/broad-dsp-monster-dev/transporter-aws-to-gcp-agent-config:4a4a2c5
-          imagePullPolicy: Always
+          image: us.gcr.io/broad-dsp-gcr-public/transporter-aws-to-gcp-agent-config:4a4a2c5
+          imagePullPolicy: IfNotPresent
           env:
             - name: VAULT_TOKEN_FILE
               value: /etc/vault/token
@@ -39,8 +39,8 @@ spec:
               mountPath: /working
       containers:
         - name: transporter-aws-to-gcp-agent
-          image: broadinstitute/transporter-aws-to-gcp-agent:8958bf4fc5c4fcac29a067a202890a5fcabd0e37
-          imagePullPolicy: Always
+          image: broadinstitute/transporter-aws-to-gcp-agent:57f033473c53c78de4e970db5288b37f6aae2ef5
+          imagePullPolicy: IfNotPresent
           command: [ "/bin/bash", "/etc/entrypoint.sh" ]
           env:
             - name: AGENT_HEAP_SIZE
@@ -52,7 +52,7 @@ spec:
                 command: ["sh", "-ce", "kill -s TERM 1; while $(kill -0 1 2>/dev/null); do sleep 1; done"]
           resources:
             requests:
-              cpu: 1000m
+              cpu: 500m
               memory: 800Mi
             limits:
               memory: 832Mi
