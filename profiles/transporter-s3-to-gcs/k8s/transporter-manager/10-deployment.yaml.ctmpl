@@ -1,0 +1,99 @@
+{{with $svc := env "SERVICE"}}
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{$svc}}
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: {{$svc}}
+    spec:
+      serviceAccountName: {{$svc}}-sa
+      initContainers:
+        - name: {{$svc}}-config
+          image: us.gcr.io/broad-dsp-gcr-public/transporter-manager-config:ab0a48a
+          imagePullPolicy: Always
+          env:
+            - name: ENVIRONMENT
+              value: {{env "ENVIRONMENT"}}
+            - name: VAULT_TOKEN_FILE
+              value: /etc/vault/token
+            - name: SQL_LOGIN_PATH
+              value: secret/dsde/monster/{{env "ENVIRONMENT"}}/{{env "APPLICATION_NAME"}}/{{env "INGEST_PROJECT"}}/cloudsql/logins/{{env "OWNER"}}
+            - name: NAMESPACE
+              value: {{env "OWNER"}}
+            - name: BOOTSTRAP_SERVICE
+              value: {{env "APPLICATION_NAME"}}-cluster
+            - name: REQUEST_TOPIC
+              value: transporter.requests
+            - name: PROGRESS_TOPIC
+              value: transporter.progress
+            - name: RESULT_TOPIC
+              value: transporter.results
+          volumeMounts:
+            - name: token
+              mountPath: /etc/vault
+            - name: appdir
+              mountPath: /working
+        - name: {{$svc}}-migrations
+          image: broadinstitute/transporter-manager-migrations:8958bf4fc5c4fcac29a067a202890a5fcabd0e37
+          imagePullPolicy: Always
+          command: [ "/bin/bash", "/etc/entrypoint.sh", "liquibase", "update" ]
+          volumeMounts:
+            - name: appdir
+              mountPath: /etc/entrypoint.sh
+              subPath: transporter-manager-migrations/entrypoint.sh
+      containers:
+        - name: {{$svc}}
+          image: broadinstitute/transporter-manager:8958bf4fc5c4fcac29a067a202890a5fcabd0e37
+          imagePullPolicy: Always
+          command: [ "/bin/bash", "/etc/entrypoint.sh" ]
+          env:
+            - name: TRANSPORTER_HEAP_SIZE
+              value: 1g
+          ports:
+            - name: http-port
+              containerPort: 8080
+          resources:
+            requests:
+              cpu: 250m
+              memory: 1152Mi
+            limits:
+              memory: 1280Mi
+          volumeMounts:
+            - name: appdir
+              mountPath: /etc/application.conf
+              subPath: transporter-manager/application.conf
+              readOnly: true
+            - name: appdir
+              mountPath: /etc/entrypoint.sh
+              subPath: transporter-manager/entrypoint.sh
+          readinessProbe:
+            httpGet:
+              path: /status
+              port: http-port
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 10
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /status
+              port: http-port
+            initialDelaySeconds: 60
+            periodSeconds: 20
+            timeoutSeconds: 10
+            failureThreshold: 3
+      volumes:
+        - name: token
+          secret:
+            secretName: vault-token
+            items:
+              - key: token
+                path: token
+                mode: 0444
+        - name: appdir
+          emptyDir: {}
+{{end}}

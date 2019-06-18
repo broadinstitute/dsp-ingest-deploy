@@ -1,0 +1,12 @@
+{{with $svc := env "SERVICE"}}
+apiVersion: v1
+kind: Service
+metadata:
+   name: {{$svc}}
+spec:
+  ports:
+    - port: 8080
+      targetPort: http-port
+  selector:
+    app: {{$svc}}
+{{end}}
