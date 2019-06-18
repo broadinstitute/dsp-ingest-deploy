@@ -1,4 +1,4 @@
-{{with $env := env "ENVIRONMENT"}}{{with $app := env "APPLICATION_NAME"}}{{with $project := env "PROJECT"}}
+{{with $env := env "ENVIRONMENT"}}{{with $app := env "APPLICATION_NAME"}}{{with $project := env "INGEST_PROJECT"}}
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
@@ -13,7 +13,7 @@ spec:
       serviceAccountName: transporter-agent-sa
       initContainers:
         - name: transporter-aws-to-gcp-agent-config
-          image: us.gcr.io/broad-dsp-monster-dev/transporter-aws-to-gcp-agent-config:ab0a48a
+          image: us.gcr.io/broad-dsp-monster-dev/transporter-aws-to-gcp-agent-config:4a4a2c5
           imagePullPolicy: Always
           env:
             - name: VAULT_TOKEN_FILE
@@ -38,8 +38,8 @@ spec:
             - name: appdir
               mountPath: /working
       containers:
-        - name: v2f-aws-to-gcp-agent
-          image: broadinstitute/transporter-aws-to-gcp-agent:8823f590e7b3259e1751aff0a7b0c4850e953efb
+        - name: transporter-aws-to-gcp-agent
+          image: broadinstitute/transporter-aws-to-gcp-agent:8958bf4fc5c4fcac29a067a202890a5fcabd0e37
           imagePullPolicy: Always
           command: [ "/bin/bash", "/etc/entrypoint.sh" ]
           env:
