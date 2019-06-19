@@ -20,5 +20,10 @@ org.broadinstitute.transporter {
             result-topic = {{env "RESULT_TOPIC"}}
         }
     }
+
+    transfer {
+        submission-interval = {{env "SUBMISSION_INTERVAL"}}
+        max-in-flight = {{env "MAX_CONCURRENT_TRANSFERS"}}
+    }
 }
 {{end}}{{end}}{{end}}
