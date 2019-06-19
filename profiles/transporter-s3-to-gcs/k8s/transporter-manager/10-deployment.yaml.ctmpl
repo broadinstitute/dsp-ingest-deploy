@@ -13,7 +13,7 @@ spec:
       serviceAccountName: transporter-manager-sa
       initContainers:
         - name: transporter-manager-config
-          image: us.gcr.io/broad-dsp-gcr-public/transporter-manager-config:ba6da60
+          image: us.gcr.io/broad-dsp-gcr-public/transporter-manager-config:864996f
           imagePullPolicy: IfNotPresent
           env:
             - name: ENVIRONMENT
@@ -32,6 +32,10 @@ spec:
               value: transporter.progress
             - name: RESULT_TOPIC
               value: transporter.results
+            - name: SUBMISSION_INTERVAL
+              value: 5s
+            - name: MAX_CONCURRENT_TRANSFERS
+              value: "1000"
           volumeMounts:
             - name: token
               mountPath: /etc/vault
