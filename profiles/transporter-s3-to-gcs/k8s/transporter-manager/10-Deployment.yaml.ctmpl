@@ -1,4 +1,8 @@
-{{with $env := env "ENVIRONMENT"}}{{with $app := env "APPLICATION_NAME"}}{{with $owner := env "OWNER"}}
+{{with $env := env "ENVIRONMENT"}}
+{{with $app := env "APPLICATION_NAME"}}
+{{with $owner := env "OWNER"}}
+{{with $sql_login_path := printf "secret/dsde/monster/%s/%s/%s/cloudsql/logins/%s" $env $app (env "INGEST_PROJECT") $owner}}
+{{with $sql_login := secret $sql_login_path}}
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
@@ -11,36 +15,65 @@ spec:
         app: transporter-manager
     spec:
       serviceAccountName: transporter-manager-sa
+      volumes:
+        - name: token
+          secret:
+            secretName: vault-token
+            items:
+              - key: token
+                path: token
+                mode: 0444
+        - name: ca-cert
+          secret:
+            secretName: {{$app}}-cluster-ca-cert
+            items:
+              - key: ca.cert
+                path: ca.cert
+                mode: 0444
+        - name: appdir
+          emptyDir: {}
       initContainers:
         - name: transporter-manager-config
           image: us.gcr.io/broad-dsp-gcr-public/transporter-manager-config:864996f
           imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - name: token
+              mountPath: /etc/vault
+            - name: appdir
+              mountPath: /working
+            - name: ca.cert
+              mountPath: /etc/tls
           env:
             - name: ENVIRONMENT
               value: {{$env}}
             - name: VAULT_TOKEN_FILE
               value: /etc/vault/token
-            - name: SQL_LOGIN_PATH
-              value: secret/dsde/monster/{{$env}}/{{$app}}/{{env "INGEST_PROJECT"}}/cloudsql/logins/{{$owner}}
-            - name: NAMESPACE
-              value: {{$owner}}
-            - name: BOOTSTRAP_SERVICE
-              value: {{$app}}-cluster-kafka-bootstrap
+
+            - name: DB_URL
+              value: "cloudsql-proxy.{{$owner}}"
+            - name: DB_NAME
+              value: {{$sql_login.Data.db_name}}
+            - name: DB_USERNAME
+              value: {{$sql_login.Data.username}}
+            - name: DB_PASSWORD
+              value: {{$sql_login.Data.password}}
+
+            - name: KAFKA_BOOTSTRAP_URL
+              value: "{{$app}}-cluster-kafka-bootstrap.{{$owner}}:9093"
+            - name: KAFKA_TLS_TRUSTSTORE_PATH
+              value: /etc/tls/client.truststore.jks
+
             - name: REQUEST_TOPIC
               value: transporter.requests
             - name: PROGRESS_TOPIC
               value: transporter.progress
             - name: RESULT_TOPIC
               value: transporter.results
+
             - name: SUBMISSION_INTERVAL
               value: 5s
             - name: MAX_CONCURRENT_TRANSFERS
               value: "1000"
-          volumeMounts:
-            - name: token
-              mountPath: /etc/vault
-            - name: appdir
-              mountPath: /working
         - name: transporter-manager-migrations
           image: broadinstitute/transporter-manager-migrations:37ee941b10e4cb6ace5a91054482e66e1bd875ee
           imagePullPolicy: IfNotPresent
@@ -90,14 +123,4 @@ spec:
             periodSeconds: 20
             timeoutSeconds: 10
             failureThreshold: 3
-      volumes:
-        - name: token
-          secret:
-            secretName: vault-token
-            items:
-              - key: token
-                path: token
-                mode: 0444
-        - name: appdir
-          emptyDir: {}
-{{end}}{{end}}{{end}}
+{{end}}{{end}}{{end}}{{end}}{{end}}

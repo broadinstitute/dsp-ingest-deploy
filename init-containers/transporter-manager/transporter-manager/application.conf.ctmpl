@@ -1,17 +1,15 @@
-{{with $path := env "SQL_LOGIN_PATH"}}{{with $secret := vault $path}}{{with $ns := env "NAMESPACE"}}
 org.broadinstitute.transporter {
 
-    submission-interval: 10s
-
     db {
-        username = {{$secret.Data.username}}
-        password = {{$secret.Data.password}}
-        connect-url = "jdbc:postgresql://cloudsql-proxy.{{$ns}}/{{$secret.Data.db_name}}"
+        connect-url = "jdbc:postgresql://{{env "DB_URL"}}/{{env "DB_NAME"}}"
+        username = "{{env "DB_USERNAME"}}"
+        password = "{{env "DB_PASSWORD"}}"
     }
 
     kafka {
         connection {
-            bootstrap-servers = ["{{env "BOOTSTRAP_SERVICE"}}.{{$ns}}:9092"]
+            bootstrap-servers = ["{{env "KAFKA_BOOTSTRAP_URL"}}"]
+            //ssl-trustore = "{{env "KAFKA_CLUSTER_TRUSTSTORE_PATH"}}"
         }
 
         topics {
@@ -26,4 +24,3 @@ org.broadinstitute.transporter {
         max-in-flight = {{env "MAX_CONCURRENT_TRANSFERS"}}
     }
 }
-{{end}}{{end}}{{end}}
