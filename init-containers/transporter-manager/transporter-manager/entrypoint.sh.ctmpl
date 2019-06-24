@@ -18,11 +18,13 @@ declare -ra JAVA_OPTS_ARRAY=(
 )
 
 # Configure the JVM to trust broker TLS certificates.
-keytool -import \
+keytool \
    -keystore '{{env "KAFKA_CLUSTER_TRUSTSTORE_PATH"}}' \
+   -storepass '{{env "KAFKA_CLUSTER_TRUSTSTORE_PASSWORD"}}' \
+   -storetype JKS \
+   -noprompt \
    -alias CARoot \
-   -file /etc/tls/ca.crt \
-   -keypass '{{env "KAFKA_CLUSTER_TRUSTSTORE_PASSWORD"}}'
+   -import -file /etc/tls/ca.crt
 
 # Inject options into normal entrypoint.
 JAVA_OPTS="${JAVA_OPTS_ARRAY[*]}" exec /app/bin/transporter-manager

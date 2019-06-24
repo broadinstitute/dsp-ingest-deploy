@@ -34,7 +34,7 @@ spec:
           emptyDir: {}
       initContainers:
         - name: transporter-manager-config
-          image: us.gcr.io/broad-dsp-gcr-public/transporter-manager-config:648c0a5
+          image: us.gcr.io/broad-dsp-gcr-public/transporter-manager-config:8d8a484
           imagePullPolicy: IfNotPresent
           volumeMounts:
             - name: token
