@@ -21,7 +21,8 @@ declare -ra JAVA_OPTS_ARRAY=(
 keytool -import \
    -keystore '{{env "KAFKA_CLUSTER_TRUSTSTORE_PATH"}}' \
    -alias CARoot \
-   -file /etc/tls/ca.cert
+   -file /etc/tls/ca.crt \
+   -keypass '{{env "KAFKA_CLUSTER_TRUSTSTORE_PASSWORD"}}'
 
 # Inject options into normal entrypoint.
 JAVA_OPTS="${JAVA_OPTS_ARRAY[*]}" exec /app/bin/transporter-manager

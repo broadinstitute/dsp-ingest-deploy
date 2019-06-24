@@ -25,23 +25,23 @@ spec:
                 mode: 0444
         - name: ca-cert
           secret:
-            secretName: {{$app}}-cluster-ca-cert
+            secretName: {{$app}}-cluster-cluster-ca-cert
             items:
-              - key: ca.cert
-                path: ca.cert
+              - key: ca.crt
+                path: ca.crt
                 mode: 0444
         - name: appdir
           emptyDir: {}
       initContainers:
         - name: transporter-manager-config
-          image: us.gcr.io/broad-dsp-gcr-public/transporter-manager-config:864996f
+          image: us.gcr.io/broad-dsp-gcr-public/transporter-manager-config:648c0a5
           imagePullPolicy: IfNotPresent
           volumeMounts:
             - name: token
               mountPath: /etc/vault
             - name: appdir
               mountPath: /working
-            - name: ca.cert
+            - name: ca-cert
               mountPath: /etc/tls
           env:
             - name: ENVIRONMENT
@@ -60,8 +60,10 @@ spec:
 
             - name: KAFKA_BOOTSTRAP_URL
               value: "{{$app}}-cluster-kafka-bootstrap.{{$owner}}:9093"
-            - name: KAFKA_TLS_TRUSTSTORE_PATH
+            - name: KAFKA_CLUSTER_TRUSTSTORE_PATH
               value: /etc/tls/client.truststore.jks
+            - name: KAFKA_CLUSTER_TRUSTSTORE_PASSWORD
+              value: qwertyuiop1234567890 # FIXME
 
             - name: REQUEST_TOPIC
               value: transporter.requests
@@ -95,10 +97,10 @@ spec:
               containerPort: 8080
           resources:
             requests:
-              cpu: 1000m
-              memory: 1152Mi
+              cpu: 500m
+              memory: 1728Mi
             limits:
-              memory: 1280Mi
+              memory: 1920Mi
           volumeMounts:
             - name: appdir
               mountPath: /etc/application.conf
