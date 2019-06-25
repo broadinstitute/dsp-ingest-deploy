@@ -1,6 +1,7 @@
 {{with $env := env "ENVIRONMENT"}}
 {{with $app := env "APPLICATION_NAME"}}
 {{with $project := env "INGEST_PROJECT"}}
+{{with $owner := env "OWNER"}}
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
@@ -44,7 +45,9 @@ spec:
               value: /etc/vault/token
 
             - name: KAFKA_BOOTSTRAP_URL
-              value: {{$app}}-cluster-kafka-bootstrap
+              value: "{{$app}}-cluster-kafka-bootstrap.{{$owner}}:9093"
+            - name: KAFKA_APPLICATION_ID
+              value: {{$owner}}-transporter-agent
             - name: KAFKA_CLUSTER_TRUSTSTORE_PATH
               value: /tmp/client.truststore.jks
             - name: KAFKA_CLUSTER_TRUSTSTORE_PASSWORD
@@ -93,4 +96,4 @@ spec:
               subPath: transporter-aws-to-gcp-agent/gcs-writer-sa.json
             - name: ca-cert
               mountPath: /etc/tls
-{{end}}{{end}}{{end}}
+{{end}}{{end}}{{end}}{{end}}
