@@ -34,15 +34,13 @@ spec:
           emptyDir: {}
       initContainers:
         - name: transporter-manager-config
-          image: us.gcr.io/broad-dsp-gcr-public/transporter-manager-config:8d8a484
+          image: us.gcr.io/broad-dsp-gcr-public/transporter-manager-config:f6fd48f
           imagePullPolicy: IfNotPresent
           volumeMounts:
             - name: token
               mountPath: /etc/vault
             - name: appdir
               mountPath: /working
-            - name: ca-cert
-              mountPath: /etc/tls
           env:
             - name: ENVIRONMENT
               value: {{$env}}
@@ -61,7 +59,7 @@ spec:
             - name: KAFKA_BOOTSTRAP_URL
               value: "{{$app}}-cluster-kafka-bootstrap.{{$owner}}:9093"
             - name: KAFKA_CLUSTER_TRUSTSTORE_PATH
-              value: /etc/tls/client.truststore.jks
+              value: /tmp/client.truststore.jks
             - name: KAFKA_CLUSTER_TRUSTSTORE_PASSWORD
               value: qwertyuiop1234567890 # FIXME
 
@@ -109,6 +107,8 @@ spec:
             - name: appdir
               mountPath: /etc/entrypoint.sh
               subPath: transporter-manager/entrypoint.sh
+            - name: ca-cert
+              mountPath: /etc/tls
           readinessProbe:
             httpGet:
               path: /status
