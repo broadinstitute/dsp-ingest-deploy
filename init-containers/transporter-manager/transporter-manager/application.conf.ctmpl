@@ -1,11 +1,11 @@
 org.broadinstitute.transporter {
-
+    {{with $secret := vault (env "DB_LOGIN_SECRETS_PATH")}}
     db {
-        connect-url = "jdbc:postgresql://{{env "DB_URL"}}/{{env "DB_NAME"}}"
-        username = "{{env "DB_USERNAME"}}"
-        password = "{{env "DB_PASSWORD"}}"
+        connect-url = "jdbc:postgresql://{{env "DB_URL"}}/{{$secret.Data.db_name}}"
+        username = "{{$secret.Data.username}}"
+        password = "{{$secret.Data.password}}"
     }
-
+    {{end}}
     kafka {
         connection {
             bootstrap-servers = ["{{env "KAFKA_BOOTSTRAP_URL"}}"]

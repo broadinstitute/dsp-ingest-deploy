@@ -1,8 +1,6 @@
 {{with $env := env "ENVIRONMENT"}}
 {{with $app := env "APPLICATION_NAME"}}
 {{with $owner := env "OWNER"}}
-{{with $sql_login_path := printf "secret/dsde/monster/%s/%s/%s/cloudsql/logins/%s" $env $app (env "INGEST_PROJECT") $owner}}
-{{with $sql_login := secret $sql_login_path}}
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
@@ -42,26 +40,20 @@ spec:
             - name: appdir
               mountPath: /working
           env:
-            - name: ENVIRONMENT
-              value: {{$env}}
             - name: VAULT_TOKEN_FILE
               value: /etc/vault/token
 
             - name: DB_URL
               value: "cloudsql-proxy.{{$owner}}"
-            - name: DB_NAME
-              value: {{$sql_login.Data.db_name}}
-            - name: DB_USERNAME
-              value: {{$sql_login.Data.username}}
-            - name: DB_PASSWORD
-              value: {{$sql_login.Data.password}}
+            - name: DB_LOGIN_SECRETS_PATH
+              value: {{printf "secret/dsde/monster/%s/%s/%s/cloudsql/logins/%s" $env $app (env "INGEST_PROJECT") $owner}}
 
             - name: KAFKA_BOOTSTRAP_URL
               value: "{{$app}}-cluster-kafka-bootstrap.{{$owner}}:9093"
             - name: KAFKA_CLUSTER_TRUSTSTORE_PATH
               value: /tmp/client.truststore.jks
             - name: KAFKA_CLUSTER_TRUSTSTORE_PASSWORD
-              value: qwertyuiop1234567890 # FIXME
+              value: required-by-keytool-but-not-meaningful-outside-of-pod
 
             - name: REQUEST_TOPIC
               value: transporter.requests
@@ -125,4 +117,4 @@ spec:
             periodSeconds: 20
             timeoutSeconds: 10
             failureThreshold: 3
-{{end}}{{end}}{{end}}{{end}}{{end}}
+{{end}}{{end}}{{end}}

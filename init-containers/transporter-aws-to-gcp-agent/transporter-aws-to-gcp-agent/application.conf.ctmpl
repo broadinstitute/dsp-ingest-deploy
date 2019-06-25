@@ -2,13 +2,18 @@
 org.broadinstitute.transporter {
 
     kafka {
-        bootstrap-servers = ["{{env "BOOTSTRAP_SERVICE"}}.{{env "NAMESPACE"}}:9092"]
-        application-id = "{{env "NAMESPACE"}}-transporter-agent"
+        bootstrap-servers = ["{{env "KAFKA_BOOTSTRAP_URL"}}"]
+        application-id = "{{env "KAFKA_APPLICATION_ID"}}"
 
         topics {
             request-topic = "{{env "REQUEST_TOPIC"}}"
             progress-topic = "{{env "PROGRESS_TOPIC"}}"
             result-topic = "{{env "RESULT_TOPIC"}}"
+        }
+
+        tls {
+            truststore-path = "{{env "KAFKA_CLUSTER_TRUSTSTORE_PATH"}}"
+            truststore-password = "{{env "KAFKA_CLUSTER_TRUSTSTORE_PASSWORD"}}"
         }
     }
 
