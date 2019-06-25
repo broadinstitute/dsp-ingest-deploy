@@ -1,45 +1,72 @@
-{{with $env := env "ENVIRONMENT"}}{{with $app := env "APPLICATION_NAME"}}{{with $project := env "INGEST_PROJECT"}}
+{{with $env := env "ENVIRONMENT"}}
+{{with $app := env "APPLICATION_NAME"}}
+{{with $project := env "INGEST_PROJECT"}}
+{{with $owner := env "OWNER"}}
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   name: transporter-agent
 spec:
-  replicas: 16
+  replicas: {{if (eq $env "prod")}}16{{else}}2{{end}}
   template:
     metadata:
       labels:
         app: transporter-agent
     spec:
       serviceAccountName: transporter-agent-sa
+      volumes:
+        - name: token
+          secret:
+            secretName: vault-token
+            items:
+              - key: token
+                path: token
+                mode: 0444
+        - name: ca-cert
+          secret:
+            secretName: {{$app}}-cluster-cluster-ca-cert
+            items:
+              - key: ca.crt
+                path: ca.crt
+                mode: 0444
+        - name: appdir
+          emptyDir: {}
       initContainers:
         - name: transporter-aws-to-gcp-agent-config
-          image: us.gcr.io/broad-dsp-gcr-public/transporter-aws-to-gcp-agent-config:4a4a2c5
+          image: us.gcr.io/broad-dsp-gcr-public/transporter-aws-to-gcp-agent-config:8d36b99
           imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - name: token
+              mountPath: /etc/vault
+            - name: appdir
+              mountPath: /working
           env:
             - name: VAULT_TOKEN_FILE
               value: /etc/vault/token
-            - name: AWS_SECRETS_PATH
-              value: secret/dsde/monster/{{$env}}/{{$app}}/{{$project}}/transporter/aws
-            - name: GCS_WRITER_SA_PATH
-              value: secret/dsde/monster/{{$env}}/{{$app}}/{{$project}}/transporter/gcs-writer-sa-key
-            - name: BOOTSTRAP_SERVICE
-              value: {{$app}}-cluster-kafka-bootstrap
-            - name: NAMESPACE
-              value: {{env "OWNER"}}
+
+            - name: KAFKA_BOOTSTRAP_URL
+              value: "{{$app}}-cluster-kafka-bootstrap.{{$owner}}:9093"
+            - name: KAFKA_APPLICATION_ID
+              value: {{$owner}}-transporter-agent
+            - name: KAFKA_CLUSTER_TRUSTSTORE_PATH
+              value: /tmp/client.truststore.jks
+            - name: KAFKA_CLUSTER_TRUSTSTORE_PASSWORD
+              value: required-by-keytool-but-not-meaningful-outside-of-pod
+
             - name: REQUEST_TOPIC
               value: transporter.requests
             - name: PROGRESS_TOPIC
               value: transporter.progress
             - name: RESULT_TOPIC
               value: transporter.results
-          volumeMounts:
-            - name: token
-              mountPath: /etc/vault
-            - name: appdir
-              mountPath: /working
+
+            - name: AWS_SECRETS_PATH
+              value: secret/dsde/monster/{{$env}}/{{$app}}/{{$project}}/transporter/aws
+            - name: GCS_WRITER_SA_PATH
+              value: secret/dsde/monster/{{$env}}/{{$app}}/{{$project}}/transporter/gcs-writer-sa-key
       containers:
         - name: transporter-aws-to-gcp-agent
-          image: broadinstitute/transporter-aws-to-gcp-agent:37ee941b10e4cb6ace5a91054482e66e1bd875ee
+          image: broadinstitute/transporter-aws-to-gcp-agent:fe99900b8a04653d4ff362e109b5d743c56d9900
           imagePullPolicy: IfNotPresent
           command: [ "/bin/bash", "/etc/entrypoint.sh" ]
           env:
@@ -67,14 +94,6 @@ spec:
             - name: appdir
               mountPath: /secrets/gcs/credentials.json
               subPath: transporter-aws-to-gcp-agent/gcs-writer-sa.json
-      volumes:
-        - name: token
-          secret:
-            secretName: vault-token
-            items:
-              - key: token
-                path: token
-                mode: 0444
-        - name: appdir
-          emptyDir: {}
-{{end}}{{end}}{{end}}
+            - name: ca-cert
+              mountPath: /etc/tls
+{{end}}{{end}}{{end}}{{end}}

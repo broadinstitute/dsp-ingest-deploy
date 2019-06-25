@@ -1,12 +1,9 @@
 #!/bin/bash
-
-{{with $path := env "SQL_LOGIN_PATH"}}{{with $secret := vault $path}}{{with $ns := env "NAMESPACE"}}
-
-declare -r LIQUIBASE_HOST=cloudsql-proxy.{{$ns}}
-declare -r LIQUIBASE_DATABASE={{$secret.Data.db_name}}
-declare -r LIQUIBASE_USERNAME={{$secret.Data.username}}
-declare -r LIQUIBASE_PASSWORD={{$secret.Data.password}}
+{{with $secret := vault (env "DB_LOGIN_SECRETS_PATH")}}
+declare -r LIQUIBASE_HOST='{{env "DB_URL"}}'
+declare -r LIQUIBASE_DATABASE='{{$secret.Data.db_name}}'
+declare -r LIQUIBASE_USERNAME='{{$secret.Data.username}}'
+declare -r LIQUIBASE_PASSWORD='{{$secret.Data.password}}'
 
 exec /usr/local/bin/entrypoint.sh ${@}
-
-{{end}}{{end}}{{end}}
+{{end}}

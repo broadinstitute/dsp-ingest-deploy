@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 
 declare -r HEAP_MEM=${AGENT_HEAP_SIZE:-512m}
 
@@ -15,6 +16,15 @@ declare -ra JAVA_OPTS_ARRAY=(
    -XX:+PrintGCDateStamps
    -XX:+PrintGCDetails
 )
+
+# Configure the JVM to trust broker TLS certificates.
+keytool \
+   -keystore '{{env "KAFKA_CLUSTER_TRUSTSTORE_PATH"}}' \
+   -storepass '{{env "KAFKA_CLUSTER_TRUSTSTORE_PASSWORD"}}' \
+   -storetype JKS \
+   -noprompt \
+   -alias CARoot \
+   -import -file /etc/tls/ca.crt
 
 # Inject options into normal entrypoint.
 JAVA_OPTS="${JAVA_OPTS_ARRAY[*]}" exec /app/bin/transporter-aws-to-gcp-agent
