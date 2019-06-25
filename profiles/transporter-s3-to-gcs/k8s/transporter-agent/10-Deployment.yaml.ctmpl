@@ -32,7 +32,7 @@ spec:
           emptyDir: {}
       initContainers:
         - name: transporter-aws-to-gcp-agent-config
-          image: us.gcr.io/broad-dsp-gcr-public/transporter-aws-to-gcp-agent-config:4a4a2c5
+          image: us.gcr.io/broad-dsp-gcr-public/transporter-aws-to-gcp-agent-config:8d36b99
           imagePullPolicy: IfNotPresent
           volumeMounts:
             - name: token
@@ -63,7 +63,7 @@ spec:
               value: secret/dsde/monster/{{$env}}/{{$app}}/{{$project}}/transporter/gcs-writer-sa-key
       containers:
         - name: transporter-aws-to-gcp-agent
-          image: broadinstitute/transporter-aws-to-gcp-agent:37ee941b10e4cb6ace5a91054482e66e1bd875ee
+          image: broadinstitute/transporter-aws-to-gcp-agent:fe99900b8a04653d4ff362e109b5d743c56d9900
           imagePullPolicy: IfNotPresent
           command: [ "/bin/bash", "/etc/entrypoint.sh" ]
           env:
