@@ -79,7 +79,8 @@ def generate_config(args):
         'profile_vars': {
             args.profile: {
                 'env': {
-                    'INGEST_PROJECT': args.ingest_project if args.ingest_project else 'core'
+                    'INGEST_PROJECT': args.ingest_project if args.ingest_project else 'core',
+                    'CORE_PROJECT': f'broad-dsp-monster-{args.env}'
                 }
             }
         }
