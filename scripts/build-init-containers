@@ -8,6 +8,7 @@ declare -ra INIT_CONTAINER_SERVICES=(
     cloudsql-proxy
     transporter-manager
     transporter-aws-to-gcp-agent
+    openidc-proxy
 )
 declare -r INIT_CONTAINER_PREFIX=us.gcr.io/broad-dsp-gcr-public
 

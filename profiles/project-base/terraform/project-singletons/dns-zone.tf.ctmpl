@@ -1,0 +1,8 @@
+{{if (eq (env "GOOGLE_PROJECT") (env "CORE_PROJECT"))}}
+resource "google_dns_managed_zone" "{{env "APPLICATION_NAME"}}-dns-zone" {
+  provider = "google"
+  project = "{{env "GOOGLE_PROJECT"}}"
+  name = "{{env "DNS_ZONE_NAME"}}"
+  dns_name = "{{env "DNS_ZONE"}}."
+}
+{{end}}

@@ -1,0 +1,70 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: openidc-proxy
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: openidc-proxy
+    spec:
+      serviceAccountName: openidc-proxy-sa
+      volumes:
+        - name: token
+          secret:
+            secretName: vault-token
+            items:
+              - key: token
+                path: token
+                mode: 0444
+        - name: appdir
+          emptyDir: {}
+      initContainers:
+        - name: opendic-proxy-config
+          image: us.gcr.io/broad-dsp-gcr-public/openidc-proxy-config:6c65fc1
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - name: token
+              mountPath: /etc/vault
+            - name: appdir
+              mountPath: /working
+          env:
+            - name: VAULT_TOKEN_FILE
+              value: /etc/vault/token
+      containers:
+        - name: openidc-proxy
+          # Based on the latest security review this is the recommended version of the proxy to use.
+          image: broadinstitute/openidc-proxy:bernick_tcell
+          ports:
+            - name: http-port
+              containerPort: 80
+          env:
+            - name: PROXY_URL
+              value: "http://transporter-manager.{{env "OWNER"}}:8080/"
+            - name: PROXY_URL2
+              value: "http://transporter-manager.{{env "OWNER"}}:8080/api"
+            - name: LOG_LEVEL
+              value: debug
+            - name: SERVER_NAME
+              value: "{{env "OWNER"}}-{{if (eq (env "GOOGLE_PROJECT") (env "CORE_PROJECT"))}}{{else}}{{env "INGEST_PROJECT"}}-{{end}}transporter.{{env "DNS_ZONE"}}"
+          volumeMounts:
+            - name: appdir
+              mountPath: /etc/apache2/sites-available/site.conf
+              subPath: openidc-proxy/site.conf
+          readinessProbe:
+            httpGet:
+              path: /status
+              port: 80
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /status
+              port: 80
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
