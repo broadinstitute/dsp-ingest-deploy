@@ -47,7 +47,7 @@ spec:
             - name: LOG_LEVEL
               value: debug
             - name: SERVER_NAME
-              value: "{{env "OWNER"}}-{{env "INGEST_PROJECT"}}-transporter-manager.{{env "DNS_ZONE_NAME"}}.broadinstitute.org"
+              value: "{{env "OWNER"}}-{{if (eq (env "GOOGLE_PROJECT") (env "CORE_PROJECT"))}}{{else}}{{env "INGEST_PROJECT"}}-{{end}}transporter.{{env "DNS_ZONE"}}"
           volumeMounts:
             - name: appdir
               mountPath: /etc/apache2/sites-available/site.conf
