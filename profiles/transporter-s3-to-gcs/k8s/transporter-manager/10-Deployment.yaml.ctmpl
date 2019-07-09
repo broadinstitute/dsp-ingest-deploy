@@ -32,7 +32,7 @@ spec:
           emptyDir: {}
       initContainers:
         - name: transporter-manager-config
-          image: us.gcr.io/broad-dsp-gcr-public/transporter-manager-config:8d36b99
+          image: us.gcr.io/broad-dsp-gcr-public/transporter-manager-config:d3c5581
           imagePullPolicy: IfNotPresent
           volumeMounts:
             - name: token
@@ -54,6 +54,15 @@ spec:
               value: /tmp/client.truststore.jks
             - name: KAFKA_CLUSTER_TRUSTSTORE_PASSWORD
               value: required-by-keytool-but-not-meaningful-outside-of-pod
+            - name: KAFKA_SCRAM_USERNAME
+              value: transporter-manager-user
+            - name: KAFKA_SCRAM_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: transporter-manager-user
+                  key: password
+            - name: KAFKA_SCRAM_ALGORITHM
+              value: sha-512
 
             - name: REQUEST_TOPIC
               value: transporter.requests
@@ -67,7 +76,7 @@ spec:
             - name: MAX_CONCURRENT_TRANSFERS
               value: "1000"
         - name: transporter-manager-migrations
-          image: broadinstitute/transporter-manager-migrations:fe99900b8a04653d4ff362e109b5d743c56d9900
+          image: broadinstitute/transporter-manager-migrations:59ff5327a291ccbb98a8407d2a65d8abeaef2814
           imagePullPolicy: IfNotPresent
           command: [ "/bin/bash", "/etc/entrypoint.sh", "liquibase", "update" ]
           volumeMounts:
@@ -76,7 +85,7 @@ spec:
               subPath: transporter-manager-migrations/entrypoint.sh
       containers:
         - name: transporter-manager
-          image: broadinstitute/transporter-manager:fe99900b8a04653d4ff362e109b5d743c56d9900
+          image: broadinstitute/transporter-manager:59ff5327a291ccbb98a8407d2a65d8abeaef2814
           imagePullPolicy: IfNotPresent
           command: [ "/bin/bash", "/etc/entrypoint.sh" ]
           env:
