@@ -32,7 +32,7 @@ spec:
           emptyDir: {}
       initContainers:
         - name: transporter-manager-config
-          image: us.gcr.io/broad-dsp-gcr-public/transporter-manager-config:d3c5581
+          image: us.gcr.io/broad-dsp-gcr-public/transporter-manager-config:d688a33
           imagePullPolicy: IfNotPresent
           volumeMounts:
             - name: token
@@ -76,7 +76,7 @@ spec:
             - name: MAX_CONCURRENT_TRANSFERS
               value: "1000"
         - name: transporter-manager-migrations
-          image: broadinstitute/transporter-manager-migrations:59ff5327a291ccbb98a8407d2a65d8abeaef2814
+          image: broadinstitute/transporter-manager-migrations:619d22abea932c615d081d4f8a61249e2cb49508
           imagePullPolicy: IfNotPresent
           command: [ "/bin/bash", "/etc/entrypoint.sh", "liquibase", "update" ]
           volumeMounts:
@@ -85,7 +85,7 @@ spec:
               subPath: transporter-manager-migrations/entrypoint.sh
       containers:
         - name: transporter-manager
-          image: broadinstitute/transporter-manager:59ff5327a291ccbb98a8407d2a65d8abeaef2814
+          image: broadinstitute/transporter-manager:619d22abea932c615d081d4f8a61249e2cb49508
           imagePullPolicy: IfNotPresent
           command: [ "/bin/bash", "/etc/entrypoint.sh" ]
           env:
