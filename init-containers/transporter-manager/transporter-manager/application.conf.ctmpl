@@ -13,6 +13,10 @@ org.broadinstitute.transporter {
                 truststore-path = "{{env "KAFKA_CLUSTER_TRUSTSTORE_PATH"}}"
                 truststore-password = "{{env "KAFKA_CLUSTER_TRUSTSTORE_PASSWORD"}}"
             }
+            scram-sha {
+                username = "{{env "KAFKA_SCRAM_SHA_USERNAME"}}"
+                password = "{{env "KAFKA_SCRAM_SHA_PASSWORD"}}"
+            }
         }
 
         topics {
