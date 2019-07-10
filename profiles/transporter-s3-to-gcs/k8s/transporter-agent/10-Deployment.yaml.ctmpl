@@ -33,7 +33,7 @@ spec:
           emptyDir: {}
       initContainers:
         - name: transporter-aws-to-gcp-agent-config
-          image: us.gcr.io/broad-dsp-gcr-public/transporter-aws-to-gcp-agent-config:8d36b99
+          image: us.gcr.io/broad-dsp-gcr-public/transporter-aws-to-gcp-agent-config:d688a33
           imagePullPolicy: IfNotPresent
           volumeMounts:
             - name: token
@@ -52,6 +52,15 @@ spec:
               value: /tmp/client.truststore.jks
             - name: KAFKA_CLUSTER_TRUSTSTORE_PASSWORD
               value: required-by-keytool-but-not-meaningful-outside-of-pod
+            - name: KAFKA_SCRAM_USERNAME
+              value: transporter-agent-user
+            - name: KAFKA_SCRAM_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: transporter-agent-user
+                  key: password
+            - name: KAFKA_SCRAM_ALGORITHM
+              value: sha-512
 
             - name: REQUEST_TOPIC
               value: transporter.requests
@@ -66,7 +75,7 @@ spec:
               value: secret/dsde/monster/{{$env}}/{{$app}}/{{$project}}/transporter/gcs-writer-sa-key
       containers:
         - name: transporter-aws-to-gcp-agent
-          image: broadinstitute/transporter-aws-to-gcp-agent:fe99900b8a04653d4ff362e109b5d743c56d9900
+          image: broadinstitute/transporter-aws-to-gcp-agent:fb7b732b3831a713b1a96b156328d220438f96fd
           imagePullPolicy: IfNotPresent
           command: [ "/bin/bash", "/etc/entrypoint.sh" ]
           env:
