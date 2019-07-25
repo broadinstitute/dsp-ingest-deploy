@@ -17,11 +17,11 @@ spec:
     spec:
       serviceAccountName: transporter-agent-sa
       volumes:
-        - name: gcs
+        - name: gcs-sa-key
           secret:
-            secretName: gcs
+            secretName: transporter-gcs-sa-key
             items:
-              - key: gcs-writer-sa-key
+              - key: json-key
                 path: {{$gcsFileName}}
                 mode: 0444
         - name: ca-cert
@@ -35,7 +35,7 @@ spec:
           emptyDir: {}
       initContainers:
         - name: transporter-aws-to-gcp-agent-config
-          image: us.gcr.io/broad-dsp-gcr-public/transporter-aws-to-gcp-agent-config:d688a33
+          image: us.gcr.io/broad-dsp-gcr-public/transporter-aws-to-gcp-agent-config:01d8017
           imagePullPolicy: IfNotPresent
           volumeMounts:
             - name: appdir
@@ -59,15 +59,16 @@ spec:
                   key: password
             - name: KAFKA_SCRAM_ALGORITHM
               value: sha-512
+
             - name: AWS_ACCESS_KEY_ID
               valueFrom:
                 secretKeyRef:
-                  name: aws
+                  name: transporter-aws-access-keys
                   key: access-key-id
             - name: AWS_SECRET_ACCESS_KEY
               valueFrom:
                 secretKeyRef:
-                  name: aws
+                  name: transporter-aws-access-keys
                   key: secret-access-key
             - name: GCS_WRITER_SA_KEY_PATH
               value: "{{$gcsKeyPath}}/{{$gcsFileName}}"
@@ -105,7 +106,7 @@ spec:
             - name: appdir
               mountPath: /etc/entrypoint.sh
               subPath: transporter-aws-to-gcp-agent/entrypoint.sh
-            - name: gcs
+            - name: gcs-sa-key
               mountPath: {{$gcsKeyPath}}
             - name: ca-cert
               mountPath: /etc/tls

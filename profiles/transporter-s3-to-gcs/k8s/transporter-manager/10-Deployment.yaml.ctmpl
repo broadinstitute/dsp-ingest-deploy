@@ -25,7 +25,7 @@ spec:
           emptyDir: {}
       initContainers:
         - name: transporter-manager-config
-          image: us.gcr.io/broad-dsp-gcr-public/transporter-manager-config:d688a33
+          image: us.gcr.io/broad-dsp-gcr-public/transporter-manager-config:01d8017
           imagePullPolicy: IfNotPresent
           volumeMounts:
             - name: appdir
@@ -36,17 +36,17 @@ spec:
             - name: DB_NAME
               valueFrom:
                 secretKeyRef:
-                  name: db
+                  name: transporter-db-login-info
                   key: dbname
             - name: DB_USERNAME
               valueFrom:
                 secretKeyRef:
-                  name: db
+                  name: transporter-db-login-info
                   key: username
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: db
+                  name: transporter-db-login-info
                   key: password
 
             - name: KAFKA_BOOTSTRAP_URL
