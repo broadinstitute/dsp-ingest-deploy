@@ -1,1 +1,0 @@
-{{with $path := env "GCS_WRITER_SA_PATH"}}{{with $secret := vault $path}}{{$secret.Data | toJSON}}{{end}}{{end}}
