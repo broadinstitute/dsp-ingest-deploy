@@ -14,13 +14,6 @@ spec:
     spec:
       serviceAccountName: transporter-manager-sa
       volumes:
-        - name: token
-          secret:
-            secretName: vault-token
-            items:
-              - key: token
-                path: token
-                mode: 0444
         - name: ca-cert
           secret:
             secretName: {{$app}}-cluster-cluster-ca-cert
@@ -32,21 +25,29 @@ spec:
           emptyDir: {}
       initContainers:
         - name: transporter-manager-config
-          image: us.gcr.io/broad-dsp-gcr-public/transporter-manager-config:d688a33
+          image: us.gcr.io/broad-dsp-gcr-public/transporter-manager-config:01d8017
           imagePullPolicy: IfNotPresent
           volumeMounts:
-            - name: token
-              mountPath: /etc/vault
             - name: appdir
               mountPath: /working
           env:
-            - name: VAULT_TOKEN_FILE
-              value: /etc/vault/token
-
             - name: DB_URL
               value: "cloudsql-proxy.{{$owner}}"
-            - name: DB_LOGIN_SECRETS_PATH
-              value: {{printf "secret/dsde/monster/%s/%s/%s/cloudsql/logins/%s" $env $app (env "INGEST_PROJECT") $owner}}
+            - name: DB_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: transporter-db-login-info
+                  key: dbname
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: transporter-db-login-info
+                  key: username
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: transporter-db-login-info
+                  key: password
 
             - name: KAFKA_BOOTSTRAP_URL
               value: "{{$app}}-cluster-kafka-bootstrap.{{$owner}}:9093"

@@ -2,6 +2,8 @@
 {{with $app := env "APPLICATION_NAME"}}
 {{with $project := env "INGEST_PROJECT"}}
 {{with $owner := env "OWNER"}}
+{{with $gcsKeyPath := "/etc/gcs"}}
+{{with $gcsFileName := "gcs-writer-sa-key.json"}}
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
@@ -15,12 +17,12 @@ spec:
     spec:
       serviceAccountName: transporter-agent-sa
       volumes:
-        - name: token
+        - name: gcs-sa-key
           secret:
-            secretName: vault-token
+            secretName: transporter-gcs-sa-key
             items:
-              - key: token
-                path: token
+              - key: json-key
+                path: {{$gcsFileName}}
                 mode: 0444
         - name: ca-cert
           secret:
@@ -33,16 +35,12 @@ spec:
           emptyDir: {}
       initContainers:
         - name: transporter-aws-to-gcp-agent-config
-          image: us.gcr.io/broad-dsp-gcr-public/transporter-aws-to-gcp-agent-config:d688a33
+          image: us.gcr.io/broad-dsp-gcr-public/transporter-aws-to-gcp-agent-config:01d8017
           imagePullPolicy: IfNotPresent
           volumeMounts:
-            - name: token
-              mountPath: /etc/vault
             - name: appdir
               mountPath: /working
           env:
-            - name: VAULT_TOKEN_FILE
-              value: /etc/vault/token
 
             - name: KAFKA_BOOTSTRAP_URL
               value: "{{$app}}-cluster-kafka-bootstrap.{{$owner}}:9093"
@@ -62,17 +60,25 @@ spec:
             - name: KAFKA_SCRAM_ALGORITHM
               value: sha-512
 
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: transporter-aws-access-keys
+                  key: access-key-id
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: transporter-aws-access-keys
+                  key: secret-access-key
+            - name: GCS_WRITER_SA_KEY_PATH
+              value: "{{$gcsKeyPath}}/{{$gcsFileName}}"
+
             - name: REQUEST_TOPIC
               value: transporter.requests
             - name: PROGRESS_TOPIC
               value: transporter.progress
             - name: RESULT_TOPIC
               value: transporter.results
-
-            - name: AWS_SECRETS_PATH
-              value: secret/dsde/monster/{{$env}}/{{$app}}/{{$project}}/transporter/aws
-            - name: GCS_WRITER_SA_PATH
-              value: secret/dsde/monster/{{$env}}/{{$app}}/{{$project}}/transporter/gcs-writer-sa-key
       containers:
         - name: transporter-aws-to-gcp-agent
           image: broadinstitute/transporter-aws-to-gcp-agent:fb7b732b3831a713b1a96b156328d220438f96fd
@@ -100,9 +106,8 @@ spec:
             - name: appdir
               mountPath: /etc/entrypoint.sh
               subPath: transporter-aws-to-gcp-agent/entrypoint.sh
-            - name: appdir
-              mountPath: /secrets/gcs/credentials.json
-              subPath: transporter-aws-to-gcp-agent/gcs-writer-sa.json
+            - name: gcs-sa-key
+              mountPath: {{$gcsKeyPath}}
             - name: ca-cert
               mountPath: /etc/tls
-{{end}}{{end}}{{end}}{{end}}
+{{end}}{{end}}{{end}}{{end}}{{end}}{{end}}

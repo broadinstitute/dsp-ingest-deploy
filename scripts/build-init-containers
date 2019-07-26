@@ -5,7 +5,6 @@ declare -r SCRIPT_DIR=$(cd $(dirname $0) && pwd)
 declare -r PROJECT_DIR=$(dirname ${SCRIPT_DIR})
 
 declare -ra INIT_CONTAINER_SERVICES=(
-    cloudsql-proxy
     transporter-manager
     transporter-aws-to-gcp-agent
     openidc-proxy

@@ -1,4 +1,3 @@
-{{with $aws_secrets_path := env "AWS_SECRETS_PATH"}}{{with $s3_secret := vault $aws_secrets_path}}
 org.broadinstitute.transporter {
 
     kafka {
@@ -24,13 +23,12 @@ org.broadinstitute.transporter {
 
     runner-config {
         aws {
-            access-key-id = "{{$s3_secret.Data.aws_access_key_id}}"
-            secret-access-key = "{{$s3_secret.Data.aws_secret_access_key}}"
+            access-key-id = "{{env "AWS_ACCESS_KEY_ID"}}"
+            secret-access-key = "{{env "AWS_SECRET_ACCESS_KEY"}}"
         }
 
         gcp {
-            service-account-json = "/secrets/gcs/credentials.json"
+            service-account-json = "{{env "GCS_WRITER_SA_KEY_PATH"}}"
         }
     }
 }
-{{end}}{{end}}
