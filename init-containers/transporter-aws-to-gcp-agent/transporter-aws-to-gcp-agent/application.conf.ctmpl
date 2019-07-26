@@ -28,7 +28,7 @@ org.broadinstitute.transporter {
         }
 
         gcp {
-            service-account-json = {{env "GCS_WRITER_SA_KEY_PATH"}}
+            service-account-json = "{{env "GCS_WRITER_SA_KEY_PATH"}}"
         }
     }
 }

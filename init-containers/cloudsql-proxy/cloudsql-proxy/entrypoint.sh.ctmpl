@@ -1,5 +1,0 @@
-{{with $path := env "INSTANCE_VAULT_PATH"}}{{with $secret := vault $path}}
-exec /cloud_sql_proxy \
-    -instances={{$secret.Data.connection_name}}=tcp:0.0.0.0:5432 \
-    -credential_file=/secrets/cloudsql/credentials.json
-{{end}}{{end}}
