@@ -4,6 +4,7 @@
 {{with $owner := env "OWNER"}}
 {{with $gcsKeyPath := "/etc/gcs"}}
 {{with $gcsFileName := "gcs-writer-sa-key.json"}}
+{{with $tag := "cb26babba5e897499ffc44f4b7c399018fd647e6"}}
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
@@ -35,7 +36,7 @@ spec:
           emptyDir: {}
       initContainers:
         - name: transporter-aws-to-gcp-agent-config
-          image: us.gcr.io/broad-dsp-gcr-public/transporter-aws-to-gcp-agent-config:01d8017
+          image: us.gcr.io/broad-dsp-gcr-public/transporter-aws-to-gcp-agent-config:{{$tag}}
           imagePullPolicy: IfNotPresent
           volumeMounts:
             - name: appdir
@@ -81,7 +82,7 @@ spec:
               value: transporter.results
       containers:
         - name: transporter-aws-to-gcp-agent
-          image: broadinstitute/transporter-aws-to-gcp-agent:fb7b732b3831a713b1a96b156328d220438f96fd
+          image: broadinstitute/transporter-aws-to-gcp-agent:{{$tag}}
           imagePullPolicy: IfNotPresent
           command: [ "/bin/bash", "/etc/entrypoint.sh" ]
           env:
@@ -110,4 +111,4 @@ spec:
               mountPath: {{$gcsKeyPath}}
             - name: ca-cert
               mountPath: /etc/tls
-{{end}}{{end}}{{end}}{{end}}{{end}}{{end}}
+{{end}}{{end}}{{end}}{{end}}{{end}}{{end}}{{end}}
