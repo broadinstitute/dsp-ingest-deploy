@@ -1,63 +1,68 @@
-variable "broad_range_cidrs" {
-  default = [
-  {
-    cidr_block = "69.173.64.0/19"
-  },
-  {
-    cidr_block = "69.173.96.0/20"
-  },
-  {
-    cidr_block = "69.173.112.0/21"
-  },
-  {
-    cidr_block = "69.173.120.0/22"
-  },
-  {
-    cidr_block = "69.173.124.0/23"
-  },
-  {
-    cidr_block = "69.173.126.0/24"
-  },
-  {
-    cidr_block = "69.173.127.0/25"
-  },
-  {
-    cidr_block = "69.173.127.128/26"
-  },
-  {
-    cidr_block = "69.173.127.192/27"
-  },
-  {
-    cidr_block = "69.173.127.224/30"
-  },
-  {
-    cidr_block = "69.173.127.228/32"
-  },
-  {
-    cidr_block = "69.173.127.230/31"
-  },
-  {
-    cidr_block = "69.173.127.232/29"
-  },
-  {
-    cidr_block = "69.173.127.240/28"
-  }
+locals {
+  broad_range_cidrs = [
+    "69.173.64.0/19",
+    "69.173.96.0/20",
+    "69.173.112.0/21",
+    "69.173.120.0/22",
+    "69.173.124.0/23",
+    "69.173.126.0/24",
+    "69.173.127.0/25",
+    "69.173.127.128/26",
+    "69.173.127.192/27",
+    "69.173.127.224/30",
+    "69.173.127.228/32",
+    "69.173.127.230/31",
+    "69.173.127.232/29",
+    "69.173.127.240/28"
   ]
+  k8s_master_private_ipv4_cidr = "10.0.82.0/28"
+  broad_routeable_net = "69.173.64.0/18"
 }
 
-# CIDR to use for the hosted master netwok. must be a /28 that does NOT overlap with the network k8s is on
-variable "k8s_masters_ipv4_cidr" {
-  type = "string"
-  default = "10.128.1.0/28"
-
+variable "env" {
+  type = string
 }
 
-variable "k8s_masters_private_ipv4_cidr" {
-  type    = "string"
-  default = "10.0.82.0/28"
+variable "app_name" {
+  type = string
 }
 
-variable "broad_routeable_net" {
-   default = "69.173.64.0/18"
-   description = "Broad's externally routable IP network"
+variable "google_project" {
+  type = string
+}
+
+variable "core_google_project" {
+  type = string
+}
+
+variable "google_region" {
+  type = string
+}
+
+variable "dns_zone" {
+  type = string
+}
+
+variable "dns_zone_name" {
+  type = string
+}
+
+variable "ingest_project" {
+  type = string
+}
+
+variable "k8s_cluster_name" {
+  type = string
+}
+
+variable "k8s_version" {
+  type = string
+}
+
+variable "k8s_node_count" {
+  type = number
+}
+
+variable "k8s_machine_type" {
+  type = string
 }
