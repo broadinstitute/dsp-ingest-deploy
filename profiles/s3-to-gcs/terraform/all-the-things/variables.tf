@@ -39,10 +39,6 @@ variable "google_region" {
   type = string
 }
 
-variable "dns_zone" {
-  type = string
-}
-
 variable "dns_zone_name" {
   type = string
 }

@@ -1,0 +1,39 @@
+{
+  "name": "monster-dns",
+  "intent": "Core DNS infrastructure for all Monster projects in prod",
+  "production": true,
+  "stability": "stable",
+  "environments": {
+      "default": {
+          "name": "prod"
+      }
+  },
+  "projects": {
+      "default": {
+          "name": "broad-dsp-monster-prod",
+          "provider_sa_path": "secret/devops/terraform/prod/monster/terraform-service-account.json"
+      },
+      "state_bucket": {
+          "provider_sa_path": "secret/dsp/service-accts/dsp-techops/terraform-state-service-account.json"
+      }
+  },
+  "terraform_state": {
+      "default": {
+          "state_bucket": "broad-dsp-terraform-state",
+          "state_path_prefix": "monster"
+      }
+  },
+  "dns": {
+      "default": {
+          "name": "monster-prod",
+          "zone": "monster-prod.broadinstitute.org"
+      }
+  },
+  "regions": {
+      "default": {
+          "name": "us-central-1",
+          "zone_name": "a"
+      }
+  },
+  "terraform_image": "gcr.io/broad-dsp-gcr-public/terraform0.12:0.12.5"
+}
