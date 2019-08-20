@@ -62,3 +62,7 @@ variable "k8s_node_count" {
 variable "k8s_machine_type" {
   type = string
 }
+
+variable "enable_dns" {
+  type = bool
+}

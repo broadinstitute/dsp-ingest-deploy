@@ -1,16 +1,19 @@
 data "google_dns_managed_zone" "core-dns-zone" {
+    count = var.enable_dns ? 1 : 0
     provider = "google"
     project = var.core_google_project
     name = var.dns_zone_name
 }
 
 resource "google_compute_global_address" "transporter-manager-ip" {
+    count = var.enable_dns ? 1 : 0
     provider = "google"
     name = "transporter-manager-ip"
     project = var.google_project
 }
 
 resource "google_dns_record_set" "transporter-manager-a-dns" {
+    count = var.enable_dns ? 1 : 0
     provider = "google"
     project = var.core_google_project
     type = "A"
@@ -24,6 +27,7 @@ resource "google_dns_record_set" "transporter-manager-a-dns" {
 }
 
 resource "google_dns_record_set" "transporter-manager-cname-dns" {
+    count = var.enable_dns ? 1 : 0
     provider = "google"
     project = var.core_google_project
     type = "CNAME"
