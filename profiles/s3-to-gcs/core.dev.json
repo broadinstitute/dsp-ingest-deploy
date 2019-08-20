@@ -50,5 +50,5 @@
           }
       }
   },
-  "terraform_image": "0.12"
+  "terraform_image": "gcr.io/broad-dsp-gcr-public/terraform0.12:0.12.5"
 }
