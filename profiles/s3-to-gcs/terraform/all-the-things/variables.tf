@@ -31,6 +31,10 @@ variable "google_project" {
   type = string
 }
 
+variable "google_zone" {
+  type = string
+}
+
 variable "core_google_project" {
   type = string
 }

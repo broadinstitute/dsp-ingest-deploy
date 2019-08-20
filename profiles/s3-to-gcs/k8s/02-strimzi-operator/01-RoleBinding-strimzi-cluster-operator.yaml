@@ -8,6 +8,6 @@ subjects:
 - kind: ServiceAccount
   name: strimzi-cluster-operator
 roleRef:
-  kind: ClusterRole
-  name: strimzi-cluster-operator-namespaced
+  kind: Role
+  name: strimzi-cluster-operator
   apiGroup: rbac.authorization.k8s.io

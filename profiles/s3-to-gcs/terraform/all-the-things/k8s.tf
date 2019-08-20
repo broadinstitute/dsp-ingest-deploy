@@ -6,7 +6,7 @@ module "k8s" {
   providers = {
     google = "google-beta"
   }
-  location = var.google_region
+  location = var.google_zone
 
   cluster_name = var.k8s_cluster_name
   k8s_version = var.k8s_version

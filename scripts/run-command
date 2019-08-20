@@ -25,6 +25,8 @@ def build_parser():
     parser.add_argument('-p', '--profile', dest='profile', required=True,
         help='Collection of configs / templates to operate against.',
         choices=[d.name for d in (PROJECT_DIR / 'profiles').iterdir() if d.is_dir()])
+    parser.add_argument('--skip-clean', dest='clean', action='store_false',
+        help='If set, existing content in the rendered/ output directory will not be deleted before re-rendering.')
     parser.add_argument('command', choices=['deploy', 'teardown'], help='Command to run.')
     return parser
 
@@ -38,7 +40,7 @@ def run_command(args):
     print(f"Running '{args.command}' on profile '{args.profile}' with config:\n{config_string}")
 
     render_target = (PROJECT_DIR / 'rendered' / OWNER / args.profile)
-    if render_target.is_dir():
+    if args.clean and render_target.is_dir():
         shutil.rmtree(render_target.as_posix())
 
     with tempfile.NamedTemporaryFile() as tmp:

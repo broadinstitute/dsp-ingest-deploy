@@ -12,7 +12,7 @@ resource "google_compute_subnetwork" "subnetwork" {
   provider      = "google"
   region        = var.google_region
   network       = google_compute_network.network.self_link
-  depends_on    = [module.enable-services, google_compute_network.network]
-
   ip_cidr_range = "10.0.0.0/22"
+  private_ip_google_access = true
+  enable_flow_logs = true
 }
