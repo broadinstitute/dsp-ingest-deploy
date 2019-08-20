@@ -31,7 +31,7 @@
   },
   "regions": {
       "default": {
-          "name": "us-central-1",
+          "name": "us-central1",
           "zone_name": "a"
       }
   },

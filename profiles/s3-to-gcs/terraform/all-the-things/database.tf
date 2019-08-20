@@ -15,6 +15,7 @@ resource "google_sql_user" "transporter-db-user" {
     password = random_id.transporter-db-password.hex
     project = var.google_project
     instance = google_sql_database_instance.postgres-100.name
+    depends_on = [google_sql_database.transporter-db]
 }
 
 resource "vault_generic_secret" "transporter-db-login-secret" {
