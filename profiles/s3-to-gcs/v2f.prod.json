@@ -1,0 +1,54 @@
+{
+  "name": "ingest",
+  "intent": "S3->GCS transfers for V2F",
+  "production": true,
+  "stability": "stable",
+  "environments": {
+      "default": {
+          "name": "v2f-prod"
+      }
+  },
+  "projects": {
+      "default": {
+          "name": "broad-dsp-monster-v2f-prod",
+          "provider_sa_path": "secret/devops/terraform/prod/monster/terraform-service-account.json"
+      },
+      "state_bucket": {
+          "provider_sa_path": "secret/dsp/service-accts/dsp-techops/terraform-state-service-account.json"
+      }
+  },
+  "terraform_state": {
+      "default": {
+          "state_bucket": "broad-dsp-terraform-state",
+          "state_path_prefix": "monster"
+      }
+  },
+  "dns": {
+      "default": {
+          "name": "monster-prod",
+          "zone": "monster-prod.broadinstitute.org"
+      }
+  },
+  "regions": {
+      "default": {
+          "name": "us-central-1",
+          "zone_name": "a"
+      }
+  },
+  "clusters": {
+      "default": {
+          "name": "ingest-k8s-cluster"
+      }
+  },
+  "profile_vars": {
+      "s3-to-gcs": {
+          "env": {
+              "INGEST_PROJECT": "v2f",
+              "CORE_PROJECT": "broad-dsp-monster-prod",
+              "K8S_NODE_COUNT": 5,
+              "K8S_MACHINE_TYPE": "n1-standard-4"
+          }
+      }
+  },
+  "terraform_image": "0.12"
+}
