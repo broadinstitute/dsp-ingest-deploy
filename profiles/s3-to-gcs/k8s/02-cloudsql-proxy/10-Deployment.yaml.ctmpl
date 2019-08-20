@@ -1,0 +1,53 @@
+{{with $cloudsqlCredsPath := "/secrets/cloudsql"}}
+{{with $cloudsqlCredsFileName := "credentials.json"}}
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: cloudsql-proxy
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: cloudsql-proxy
+    spec:
+      serviceAccountName: cloudsql-proxy-sa
+      volumes:
+        - name: cloudsql-keys
+          secret:
+            secretName: cloudsql-keys
+            items:
+              - key: credential-file-json
+                path: {{$cloudsqlCredsFileName}}
+                mode: 0444
+      containers:
+        - name: cloudsql-proxy
+          image: b.gcr.io/cloudsql-docker/gce-proxy:latest
+          imagePullPolicy: IfNotPresent
+          command: ["/cloud_sql_proxy"]
+          args:
+            - "-instances=$(CLOUDSQL_CONNECTION_NAME)=tcp:0.0.0.0:5432"
+            - "-credential_file={{$cloudsqlCredsPath}}/{{$cloudsqlCredsFileName}}"
+          env:
+            - name: CLOUDSQL_CONNECTION_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: cloudsql-keys
+                  key: connection-name
+          ports:
+            - name: db-port
+              containerPort: 5432
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              memory: 24Mi
+          readinessProbe:
+            tcpSocket:
+              port: 5432
+            timeoutSeconds: 1
+          volumeMounts:
+            - name: cloudsql-keys
+              mountPath: {{$cloudsqlCredsPath}}
+{{end}}{{end}}

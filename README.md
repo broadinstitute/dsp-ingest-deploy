@@ -18,9 +18,6 @@ $ ./scripts/run-command -h
 ```
 
 ## Setting Up a New Project
-Some deployment profiles only make sense for certain ingest use-cases, but a common set are needed to
-support the rest:
-1. [project-base](profiles/project-base/README.md)
-2. [user-base](profiles/user-base/README.md)
-
-Run the `deploy` command of `./scripts/run-command` on these profiles in order to initialize a new project.
+Each profile in this repository models the full end-state of an ingest system. We eventually hope to break
+common pieces into Terraform modules and Helm charts, but until then the only way to create a new profile
+is to copy-paste an existing profile and tweak its parameters as needed.

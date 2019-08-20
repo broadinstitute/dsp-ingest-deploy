@@ -1,0 +1,9 @@
+apiVersion: kafka.strimzi.io/v1beta1
+kind: KafkaUser
+metadata:
+  name: transporter-agent-user
+  labels:
+    strimzi.io/cluster: ingest-cluster
+spec:
+  authentication:
+    type: scram-sha-512

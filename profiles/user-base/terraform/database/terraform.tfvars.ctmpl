@@ -1,5 +1,0 @@
-env = "{{env "ENVIRONMENT"}}"
-app_name = "{{env "APPLICATION_NAME"}}"
-google_project = "{{env "GOOGLE_PROJECT"}}"
-ingest_project = "{{env "INGEST_PROJECT"}}"
-db_user = "{{env "OWNER"}}"
