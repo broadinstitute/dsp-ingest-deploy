@@ -1,0 +1,64 @@
+#!/usr/bin/env python3
+
+import argparse
+import json
+import os
+from pathlib import Path
+import shutil
+import subprocess
+import sys
+import tempfile
+
+PROJECT_DIR = Path(__file__).resolve().parents[1]
+
+OWNER = 'monster'
+
+
+def build_parser():
+    parser = argparse.ArgumentParser(description='Run a deployment command on ingest configs.')
+    parser.add_argument('-e', '--env', dest='env',
+        help='Top-level environment to operate against.',
+        choices=['dev', 'prod'], required=True)
+    parser.add_argument('-i', '--ingest-project', dest='ingest_project',
+        help='Optional refinement of the environment to point at a specific project (i.e. "v2f").',
+        default=None)
+    parser.add_argument('-p', '--profile', dest='profile', required=True,
+        help='Collection of configs / templates to operate against.',
+        choices=[d.name for d in (PROJECT_DIR / 'profiles').iterdir() if d.is_dir()])
+    parser.add_argument('command', choices=['render', 'deploy', 'teardown'], help='Command to run.')
+    return parser
+
+
+def run_command(args):
+    config = (PROJECT_DIR / 'profiles' / args.profile / f'{args.ingest_project}.{args.env}.json')
+    if not config.is_file():
+        raise FileNotFoundError(config.as_posix())
+
+    config_string = json.dumps(json.loads(config.read_text()), indent=2)
+    print(f"Running '{args.command}' on profile '{args.profile}' with config:\n{config_string}")
+
+    render_target = (PROJECT_DIR / 'rendered' / OWNER / args.profile)
+    if render_target.is_dir():
+        shutil.rmtree(render_target.as_posix())
+
+    with tempfile.NamedTemporaryFile() as tmp:
+        tmp.write(config_string.encode('utf-8'))
+        tmp.flush()
+
+        subprocess.run([
+            (PROJECT_DIR / 'dsp-k8s-deploy' / f'application-{args.command}.sh').as_posix(),
+            '-o', OWNER,
+            '-e', args.env,
+            '-j', config.as_posix(),
+            '-p', args.profile
+        ])
+
+
+def main():
+    parser = build_parser()
+    args = parser.parse_args()
+    run_command(args)
+
+
+if __name__ == '__main__':
+    main()
