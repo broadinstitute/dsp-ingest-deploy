@@ -1,13 +1,11 @@
-apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: strimzi-cluster-operator
-  labels:
-    app: strimzi
+  name: strimzi-cluster-operator-use-pod-security-policy
 subjects:
 - kind: ServiceAccount
   name: strimzi-cluster-operator
 roleRef:
   kind: Role
-  name: strimzi-cluster-operator
+  name: use-pod-security-policy-role
   apiGroup: rbac.authorization.k8s.io
