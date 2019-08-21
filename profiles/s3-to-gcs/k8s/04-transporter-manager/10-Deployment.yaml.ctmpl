@@ -1,7 +1,7 @@
 {{with $env := env "ENVIRONMENT"}}
 {{with $app := env "APPLICATION_NAME"}}
 {{with $owner := env "OWNER"}}
-{{with $tag := "cb26babba5e897499ffc44f4b7c399018fd647e6"}}
+{{with $tag := env "TRANSPORTER_VERSION"}}
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
@@ -65,6 +65,11 @@ spec:
                   key: password
             - name: KAFKA_SCRAM_ALGORITHM
               value: sha-512
+            - name: KAFKA_GROUP_ID
+              valueFrom:
+                secretKeyRef:
+                  name: transporter-manager-group-id
+                  key: id
 
             - name: REQUEST_TOPIC
               value: transporter.requests
