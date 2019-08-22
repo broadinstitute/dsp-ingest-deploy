@@ -1,3 +1,4 @@
+{{if (eq (env "ENABLE_DNS") "true")}}
 {{with $secretPrefix := printf "secret/dsde/monster/%s/common" (env "ENVIRONMENT")}}
 {{with $serverKey := secret (printf "%s/server.key" $secretPrefix)}}
 {{with $serverCrt := secret (printf "%s/server.crt" $secretPrefix)}}
@@ -11,3 +12,21 @@ data:
     tls.key: {{$serverKey.Data.value | base64Encode}}
     tls.crt: {{(printf "%s\n%s" $serverCrt.Data.value $intermediateCrt.Data.value) | base64Encode}}
 {{end}}{{end}}{{end}}{{end}}
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: transporter-manager-ingress
+  annotations:
+    kubernetes.io/ingress.global-static-ip-name: "transporter-manager-ip"
+spec:
+  tls:
+    - secretName: wildcard.{{env "DNS_ZONE_NAME"}}.broadinstitute.org
+  rules:
+    - http:
+        paths:
+          - path: /*
+            backend:
+              serviceName: transporter-manager
+              servicePort: http
+{{end}}

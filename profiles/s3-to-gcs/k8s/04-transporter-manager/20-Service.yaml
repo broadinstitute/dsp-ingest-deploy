@@ -3,8 +3,11 @@ kind: Service
 metadata:
    name: transporter-manager
 spec:
+  type: NodePort
   ports:
-    - port: 8080
+    - name: http
+      protocol: TCP
+      port: 80
       targetPort: http-port
   selector:
     app: transporter-manager
