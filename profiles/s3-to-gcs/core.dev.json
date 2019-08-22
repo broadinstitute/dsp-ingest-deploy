@@ -47,7 +47,8 @@
               "CORE_PROJECT": "broad-dsp-monster-dev",
               "K8S_NODE_COUNT": 3,
               "K8S_MACHINE_TYPE": "n1-standard-2",
-              "ENABLE_DNS": "true"
+              "ENABLE_DNS": "true",
+              "TRANSPORTER_VERSION": "d17d4f47c44abaea4ff5bda53215d19da7eb39d1"
           }
       }
   },

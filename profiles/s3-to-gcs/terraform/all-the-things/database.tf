@@ -1,11 +1,3 @@
-resource "google_sql_database" "transporter-db" {
-    name = "${var.app_name}-transporter-db"
-    project = var.google_project
-    instance = google_sql_database_instance.postgres-100.name
-    charset = "UTF8"
-    collation = "en_US.UTF8"
-}
-
 resource "random_id" "transporter-db-password" {
     byte_length = 16
 }
@@ -15,7 +7,15 @@ resource "google_sql_user" "transporter-db-user" {
     password = random_id.transporter-db-password.hex
     project = var.google_project
     instance = google_sql_database_instance.postgres-100.name
-    depends_on = [google_sql_database.transporter-db]
+}
+
+resource "google_sql_database" "transporter-db" {
+    name = "${var.app_name}-transporter-db"
+    project = var.google_project
+    instance = google_sql_database_instance.postgres-100.name
+    charset = "UTF8"
+    collation = "en_US.UTF8"
+    depends_on = [google_sql_user.transporter-db-user]
 }
 
 resource "vault_generic_secret" "transporter-db-login-secret" {
