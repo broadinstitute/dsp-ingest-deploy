@@ -21,7 +21,7 @@ def build_parser():
         choices=['dev', 'prod'], required=True)
     parser.add_argument('-i', '--ingest-project', dest='ingest_project',
         help='Optional refinement of the environment to point at a specific project (i.e. "v2f").',
-        default=None)
+        default='core')
     parser.add_argument('-p', '--profile', dest='profile', required=True,
         help='Collection of configs / templates to operate against.',
         choices=[d.name for d in (PROJECT_DIR / 'profiles').iterdir() if d.is_dir()])

@@ -70,3 +70,12 @@ variable "k8s_machine_type" {
 variable "enable_dns" {
   type = bool
 }
+
+variable "oauth_client_id" {
+  type = string
+}
+
+variable "authorized_emails" {
+  type = list(string)
+  default = []
+}

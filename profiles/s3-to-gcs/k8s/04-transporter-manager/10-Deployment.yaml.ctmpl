@@ -1,6 +1,8 @@
 {{with $env := env "ENVIRONMENT"}}
 {{with $app := env "APPLICATION_NAME"}}
 {{with $owner := env "OWNER"}}
+{{with $ingestProject := env "INGEST_PROJECT"}}
+{{with $oauth_config := secret (printf "secret/dsde/monster/%s/%s/%s/transporter/oauth" $env $app $ingestProject)}}
 {{with $tag := env "TRANSPORTER_VERSION"}}
 apiVersion: extensions/v1beta1
 kind: Deployment
@@ -32,6 +34,8 @@ spec:
             - name: appdir
               mountPath: /working
           env:
+            - name: OAUTH_CLIENT_ID
+              value: {{$oauth_config.Data.client_id}}
             - name: DB_URL
               value: "cloudsql-proxy.{{$owner}}"
             - name: DB_NAME
@@ -98,9 +102,6 @@ spec:
           env:
             - name: TRANSPORTER_HEAP_SIZE
               value: 1g
-          ports:
-            - name: http-port
-              containerPort: 8080
           resources:
             requests:
               cpu: 500m
@@ -120,7 +121,7 @@ spec:
           readinessProbe:
             httpGet:
               path: /status
-              port: http-port
+              port: 8080
             initialDelaySeconds: 5
             periodSeconds: 10
             timeoutSeconds: 10
@@ -128,9 +129,53 @@ spec:
           livenessProbe:
             httpGet:
               path: /status
-              port: http-port
-            initialDelaySeconds: 60
+              port: 8080
+            initialDelaySeconds: 20
             periodSeconds: 20
             timeoutSeconds: 10
             failureThreshold: 3
-{{end}}{{end}}{{end}}{{end}}
+        - name: openidc-proxy
+          image: broadinstitute/openidc-proxy:2.3.1_20190819
+          ports:
+            - name: http-port
+              containerPort: 80
+          env:
+            - name: PROXY_URL
+              value: "http://localhost:8080/"
+            - name: PROXY_URL2
+              value: "http://localhost:8080/api"
+            - name: LOG_LEVEL
+              value: debug
+            - name: PROXY_PATH
+              value: /
+            - name: AUTH_TYPE
+              value: AuthType None
+            - name: OIDC_CLAIM
+              value: Require all granted
+            - name: PROXY_PATH2
+              value: /api
+            - name: AUTH_TYPE2
+              value: AuthType oauth20
+            - name: OIDC_CLAIM2
+              value:{{range $oauth_config.Data.authorized_emails}} Require claim email:{{.}}{{else}}Require valid-user{{end}}
+          volumeMounts:
+            - name: appdir
+              mountPath: /etc/apache2/sites-available/site.conf
+              subPath: openidc-proxy/site.conf
+          readinessProbe:
+            httpGet:
+              path: /status
+              port: 80
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /status
+              port: 80
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+{{end}}{{end}}{{end}}{{end}}{{end}}{{end}}
