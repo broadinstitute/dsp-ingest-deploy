@@ -1,6 +1,8 @@
 {{with $env := env "ENVIRONMENT"}}
 {{with $app := env "APPLICATION_NAME"}}
 {{with $owner := env "OWNER"}}
+{{with $ingestProject := env "INGEST_PROJECT"}}
+{{with $oauth_config := secret (printf "secret/dsde/monster/%s/%s/%s/transporter/oauth" $env $app $ingestProject)}}
 {{with $tag := env "TRANSPORTER_VERSION"}}
 apiVersion: extensions/v1beta1
 kind: Deployment
@@ -32,6 +34,8 @@ spec:
             - name: appdir
               mountPath: /working
           env:
+            - name: OAUTH_CLIENT_ID
+              value: {{$oauth_config.Data.client_id}}
             - name: DB_URL
               value: "cloudsql-proxy.{{$owner}}"
             - name: DB_NAME
@@ -142,6 +146,18 @@ spec:
               value: "http://localhost:8080/api"
             - name: LOG_LEVEL
               value: debug
+            - name: PROXY_PATH
+              value: /
+            - name: AUTH_TYPE
+              value: AuthType None
+            - name: OIDC_CLAIM
+              value: Require all granted
+            - name: PROXY_PATH2
+              value: /api
+            - name: AUTH_TYPE2
+              value: AuthType oauth20
+            - name: OIDC_CLAIM2
+              value:{{range $oauth_config.Data.authorized_subjects}} Require claim user_id:{{.}}{{else}}Require valid-user{{end}}
           volumeMounts:
             - name: appdir
               mountPath: /etc/apache2/sites-available/site.conf
@@ -162,4 +178,4 @@ spec:
             periodSeconds: 10
             timeoutSeconds: 3
             failureThreshold: 3
-{{end}}{{end}}{{end}}{{end}}
+{{end}}{{end}}{{end}}{{end}}{{end}}{{end}}

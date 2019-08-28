@@ -32,7 +32,7 @@
   "regions": {
       "default": {
           "name": "us-central1",
-          "zone_name": "a"
+          "zone_name": "c"
       }
   },
   "clusters": {
@@ -48,7 +48,9 @@
               "K8S_NODE_COUNT": 3,
               "K8S_MACHINE_TYPE": "n1-standard-2",
               "ENABLE_DNS": "true",
-              "TRANSPORTER_VERSION": "d17d4f47c44abaea4ff5bda53215d19da7eb39d1"
+              "TRANSPORTER_VERSION": "a6d4c6aed5cd515b13492a75463568be86b32b5a",
+              "OAUTH_CLIENT_ID": "274016428892-rkbfqfj472iqh5r9n523gr6g1l29o21f.apps.googleusercontent.com",
+              "AUTHORIZED_SUBJECTS": ["101287161184355758509"]
           }
       }
   },

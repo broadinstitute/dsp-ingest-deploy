@@ -12,3 +12,13 @@ resource "vault_generic_secret" "transporter-group-id-secret" {
 }
 EOT
 }
+
+resource "vault_generic_secret" "transporter-oauth-secret" {
+    path = "secret/dsde/monster/${var.env}/${var.app_name}/${var.ingest_project}/transporter/oauth"
+    data_json = <<EOT
+{
+    "client_id": "${var.oauth_client_id}",
+    "authorized_subjects": ${jsonencode(var.authorized_subjects)}
+}
+EOT
+}
