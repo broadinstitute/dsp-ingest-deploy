@@ -75,7 +75,7 @@ variable "oauth_client_id" {
   type = string
 }
 
-variable "authorized_subjects" {
+variable "authorized_emails" {
   type = list(string)
   default = []
 }

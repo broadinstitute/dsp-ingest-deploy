@@ -157,7 +157,7 @@ spec:
             - name: AUTH_TYPE2
               value: AuthType oauth20
             - name: OIDC_CLAIM2
-              value:{{range $oauth_config.Data.authorized_subjects}} Require claim user_id:{{.}}{{else}}Require valid-user{{end}}
+              value:{{range $oauth_config.Data.authorized_emails}} Require claim email:{{.}}{{else}}Require valid-user{{end}}
           volumeMounts:
             - name: appdir
               mountPath: /etc/apache2/sites-available/site.conf

@@ -47,10 +47,10 @@
               "CORE_PROJECT": "broad-dsp-monster-dev",
               "K8S_NODE_COUNT": 3,
               "K8S_MACHINE_TYPE": "n1-standard-2",
-              "ENABLE_DNS": "true",
               "TRANSPORTER_VERSION": "a6d4c6aed5cd515b13492a75463568be86b32b5a",
+              "ENABLE_DNS": "true",
               "OAUTH_CLIENT_ID": "274016428892-rkbfqfj472iqh5r9n523gr6g1l29o21f.apps.googleusercontent.com",
-              "AUTHORIZED_SUBJECTS": ["101287161184355758509"]
+              "AUTHORIZED_EMAILS": ["monster.dan.dev@gmail.com"]
           }
       }
   },

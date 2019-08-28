@@ -18,7 +18,7 @@ resource "vault_generic_secret" "transporter-oauth-secret" {
     data_json = <<EOT
 {
     "client_id": "${var.oauth_client_id}",
-    "authorized_subjects": ${jsonencode(var.authorized_subjects)}
+    "authorized_emails": ${jsonencode(var.authorized_emails)}
 }
 EOT
 }

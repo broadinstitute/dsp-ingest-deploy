@@ -12,4 +12,4 @@ k8s_node_count = {{env "K8S_NODE_COUNT"}}
 k8s_machine_type = "{{env "K8S_MACHINE_TYPE"}}"
 enable_dns = {{env "ENABLE_DNS"}}
 oauth_client_id = "{{env "OAUTH_CLIENT_ID"}}"
-authorized_subjects = [{{range env "AUTHORIZED_SUBJECTS" | parseJSON}}"{{.}}"{{end}}]
+authorized_emails = [{{range env "AUTHORIZED_EMAILS" | parseJSON}}"{{.}}"{{end}}]
