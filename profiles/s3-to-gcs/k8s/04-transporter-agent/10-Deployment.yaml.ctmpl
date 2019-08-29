@@ -5,6 +5,7 @@
 {{with $gcsKeyPath := "/etc/gcs"}}
 {{with $gcsFileName := "gcs-writer-sa-key.json"}}
 {{with $tag := env "TRANSPORTER_VERSION"}}
+{{with $groupConfig := secret (printf "secret/dsde/monster/%s/%s/%s/kafka/group-ids/transporter" $env $app $project)}}
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
@@ -46,10 +47,7 @@ spec:
             - name: KAFKA_BOOTSTRAP_URL
               value: "{{$app}}-cluster-kafka-bootstrap.{{$owner}}:9093"
             - name: KAFKA_APPLICATION_ID
-              valueFrom:
-                secretKeyRef:
-                  name: transporter-agent-group-id
-                  key: id
+              value: {{$groupConfig.Data.agent_group}}
             - name: KAFKA_CLUSTER_TRUSTSTORE_PATH
               value: /tmp/client.truststore.jks
             - name: KAFKA_CLUSTER_TRUSTSTORE_PASSWORD
@@ -114,4 +112,4 @@ spec:
               mountPath: {{$gcsKeyPath}}
             - name: ca-cert
               mountPath: /etc/tls
-{{end}}{{end}}{{end}}{{end}}{{end}}{{end}}{{end}}
+{{end}}{{end}}{{end}}{{end}}{{end}}{{end}}{{end}}{{end}}
