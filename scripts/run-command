@@ -22,9 +22,9 @@ def build_parser():
     parser.add_argument('-i', '--ingest-project', dest='ingest_project',
         help='Optional refinement of the environment to point at a specific project (i.e. "v2f").',
         default='core')
-    parser.add_argument('-p', '--profile', dest='profile', required=True,
+    parser.add_argument('-t', '--template', dest='template', required=True,
         help='Collection of configs / templates to operate against.',
-        choices=[d.name for d in (PROJECT_DIR / 'profiles').iterdir() if d.is_dir()])
+        choices=[d.name for d in (PROJECT_DIR / 'templates').iterdir() if d.is_dir()])
     parser.add_argument('--skip-clean', dest='clean', action='store_false',
         help='If set, existing content in the rendered/ output directory will not be deleted before re-rendering.')
     parser.add_argument('command', choices=['deploy', 'teardown'], help='Command to run.')
@@ -32,14 +32,14 @@ def build_parser():
 
 
 def run_command(args):
-    config = (PROJECT_DIR / 'profiles' / args.profile / f'{args.ingest_project}.{args.env}.json')
+    config = (PROJECT_DIR / 'templates' / args.template / f'{args.ingest_project}.{args.env}.json')
     if not config.is_file():
         raise FileNotFoundError(config.as_posix())
 
     config_string = json.dumps(json.loads(config.read_text()), indent=2)
-    print(f"Running '{args.command}' on profile '{args.profile}' with config:\n{config_string}")
+    print(f"Running '{args.command}' on template '{args.template}' with profile:\n{config_string}")
 
-    render_target = (PROJECT_DIR / 'rendered' / OWNER / args.profile)
+    render_target = (PROJECT_DIR / 'rendered' / args.template)
     if args.clean and render_target.is_dir():
         shutil.rmtree(render_target.as_posix())
 
@@ -49,11 +49,8 @@ def run_command(args):
 
         subprocess.run([
             (PROJECT_DIR / 'dsp-k8s-deploy' / f'application-{args.command}.sh').as_posix(),
-            '-o', OWNER,
-            '-e', args.env,
-            '-j', config.as_posix(),
-            '-p', args.profile,
-            '-a' # Use application default credentials instead of a God-powered SA
+            '-p', config.as_posix(),
+            '-t', args.template
         ])
 
 

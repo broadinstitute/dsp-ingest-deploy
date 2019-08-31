@@ -1,0 +1,19 @@
+{
+  "name": "monster-dns",
+  "description": "Core DNS infrastructure for all Monster projects in prod",
+  "owner": "monster",
+  "google": {
+    "project": "broad-dsp-monster-prod",
+    "region": "us-central1",
+    "zone": "a"
+  },
+  "terraform": {
+    "state_bucket": "broad-dsp-monster-prod-terraform-state",
+    "state_path": "monster/core-dns/monster-dns.tfstate.json",
+    "docker_image": "gcr.io/broad-dsp-gcr-public/terraform0.12:0.12.5"
+  },
+  "env": {
+    "DNS_ZONE_NAME": "monster-prod",
+    "DNS_ZONE": "monster-prod.broadinstitute.org"
+  }
+}
