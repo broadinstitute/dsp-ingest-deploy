@@ -26,6 +26,8 @@
       "ENABLE_DNS": "true",
       "TRANSPORTER_DNS_NAME": "transporter",
       "TLS_CERT_SECRET_PREFIX": "secret/dsde/monster/dev/common",
+      "S3_KEYS_SECRET": "secret/dsde/monster/dev/ingest/core/transporter/aws",
+      "GCS_SA_KEY_SECRET": "secret/dsde/monster/dev/ingest/core/transporter/gcs-writer-sa-key",
       "OAUTH_CLIENT_ID": "274016428892-rkbfqfj472iqh5r9n523gr6g1l29o21f.apps.googleusercontent.com",
       "AUTHORIZED_EMAILS": ["monster.dan.dev@gmail.com"],
       "TRANSPORTER_AGENT_COUNT": 2

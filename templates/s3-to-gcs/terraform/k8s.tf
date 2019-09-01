@@ -12,7 +12,7 @@ module "k8s" {
   k8s_version = var.k8s_version
 
   cluster_network = google_compute_network.network.name
-  cluster_subnetwork = google_compute_subnetwork.subnetwork.name
+  cluster_subnetwork = google_compute_subnetwork.subnetwork-with-logging.name
 
   node_pool_count = var.k8s_node_count
   node_pool_machine_type = var.k8s_machine_type
