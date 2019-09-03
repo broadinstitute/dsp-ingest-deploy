@@ -11,8 +11,6 @@ import tempfile
 
 PROJECT_DIR = Path(__file__).resolve().parents[1]
 
-OWNER = 'monster'
-
 
 def build_parser():
     parser = argparse.ArgumentParser(description='Run a deployment command on ingest configs.')
