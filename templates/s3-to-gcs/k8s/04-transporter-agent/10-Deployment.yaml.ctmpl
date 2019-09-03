@@ -40,7 +40,6 @@ spec:
             - name: appdir
               mountPath: /working
           env:
-
             - name: KAFKA_BOOTSTRAP_URL
               value: "ingest-cluster-kafka-bootstrap:9093"
             - name: KAFKA_APPLICATION_ID
@@ -109,4 +108,20 @@ spec:
               mountPath: {{$gcsKeyPath}}
             - name: ca-cert
               mountPath: /etc/tls
+          readinessProbe:
+            httpGet:
+              path: /status
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 10
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /status
+              port: 8080
+            initialDelaySeconds: 20
+            periodSeconds: 20
+            timeoutSeconds: 10
+            failureThreshold: 3
 {{end}}{{end}}{{end}}{{end}}{{end}}
