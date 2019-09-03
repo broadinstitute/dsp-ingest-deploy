@@ -52,7 +52,8 @@ def run_command(args):
             '-o', OWNER,
             '-e', args.env,
             '-j', config.as_posix(),
-            '-p', args.profile
+            '-p', args.profile,
+            '-a' # Use application default credentials instead of a God-powered SA
         ])
 
 

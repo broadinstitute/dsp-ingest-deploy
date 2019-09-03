@@ -3,6 +3,7 @@
 {{with $owner := env "OWNER"}}
 {{with $ingestProject := env "INGEST_PROJECT"}}
 {{with $oauth_config := secret (printf "secret/dsde/monster/%s/%s/%s/transporter/oauth" $env $app $ingestProject)}}
+{{with $group_config := secret (printf "secret/dsde/monster/%s/%s/%s/kafka/group-ids/transporter" $env $app $ingestProject)}}
 {{with $tag := env "TRANSPORTER_VERSION"}}
 apiVersion: extensions/v1beta1
 kind: Deployment
@@ -70,10 +71,7 @@ spec:
             - name: KAFKA_SCRAM_ALGORITHM
               value: sha-512
             - name: KAFKA_GROUP_ID
-              valueFrom:
-                secretKeyRef:
-                  name: transporter-manager-group-id
-                  key: id
+              value: {{$group_config.Data.manager_group}}
 
             - name: REQUEST_TOPIC
               value: transporter.requests
@@ -178,4 +176,4 @@ spec:
             periodSeconds: 10
             timeoutSeconds: 3
             failureThreshold: 3
-{{end}}{{end}}{{end}}{{end}}{{end}}{{end}}
+{{end}}{{end}}{{end}}{{end}}{{end}}{{end}}{{end}}
