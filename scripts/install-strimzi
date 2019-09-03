@@ -24,7 +24,7 @@ function templatize_configs () {
     local -ra to_templatize=( $(find ${config_dir} -name '*.yaml' -exec  grep -r -l 'namespace: ' {} \;) )
 
     for config in ${to_templatize[@]}; do
-        sed 's/namespace: .*/namespace: {{env "OWNER"}}/g' ${config} > ${config}.ctmpl
+        sed 's/namespace: .*/namespace: {{env "K8S_NAMESPACE"}}/g' ${config} > ${config}.ctmpl
         rm ${config}
     done
 }

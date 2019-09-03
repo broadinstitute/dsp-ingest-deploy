@@ -1,0 +1,43 @@
+{{with $secretPrefix := env "VAULT_PREFIX"}}
+{{with $group_config := secret (printf "%s/kafka/group-ids/transporter" $secretPrefix)}}
+apiVersion: kafka.strimzi.io/v1beta1
+kind: KafkaUser
+metadata:
+  name: transporter-manager-user
+  labels:
+    strimzi.io/cluster: ingest-cluster
+spec:
+  authentication:
+    type: scram-sha-512
+  authorization:
+    type: simple
+    acls:
+      - operation: Read
+        type: allow
+        resource:
+          type: group
+          name: {{$group_config.Data.manager_group}}
+          patternType: literal
+      - operation: Write
+        type: allow
+        resource:
+          type: topic
+          name: transporter.requests
+          patternType: literal
+      - operation: Read
+        type: allow
+        resource:
+          type: topic
+          name: transporter.progress
+          patternType: literal
+      - operation: Read
+        type: allow
+        resource:
+          type: topic
+          name: transporter.results
+          patternType: literal
+      - operation: IdempotentWrite
+        type: allow
+        resource:
+          type: cluster
+{{end}}{{end}}

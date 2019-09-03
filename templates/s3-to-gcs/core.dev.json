@@ -1,0 +1,35 @@
+{
+  "name": "ingest",
+  "description": "S3->GCS testing in dev",
+  "owner": "monster",
+  "google": {
+      "project": "broad-dsp-monster-dev",
+      "region": "us-central1",
+      "zone": "c"
+  },
+  "terraform": {
+      "state_bucket": "broad-dsp-monster-dev-terraform-state",
+      "state_path": "monster/s3-to-gcs/ingest.terraform-state.json",
+      "docker_image": "gcr.io/broad-dsp-gcr-public/terraform0.12:0.12.5"
+  },
+  "k8s": {
+      "cluster_name": "ingest-k8s-cluster",
+      "namespace": "transporter"
+  },
+  "env": {
+      "VAULT_PREFIX": "secret/dsde/monster/dev/ingest/core",
+      "DNS_PROJECT": "broad-dsp-monster-dev",
+      "DNS_ZONE_NAME": "monster-dev",
+      "K8S_NODE_COUNT": 3,
+      "K8S_MACHINE_TYPE": "n1-standard-2",
+      "TRANSPORTER_VERSION": "1856c2d66f80874f9c7a29c1a7dca2988ae1bdd3",
+      "ENABLE_DNS": true,
+      "TRANSPORTER_DNS_NAME": "transporter",
+      "TLS_CERT_SECRET_PREFIX": "secret/dsde/monster/dev/common",
+      "S3_KEYS_SECRET": "secret/dsde/monster/dev/ingest/core/transporter/aws",
+      "GCS_SA_KEY_SECRET": "secret/dsde/monster/dev/ingest/core/transporter/gcs-writer-sa-key",
+      "OAUTH_CLIENT_ID": "274016428892-rkbfqfj472iqh5r9n523gr6g1l29o21f.apps.googleusercontent.com",
+      "AUTHORIZED_EMAILS": ["monster.dan.dev@gmail.com"],
+      "TRANSPORTER_AGENT_COUNT": 2
+  }
+}
