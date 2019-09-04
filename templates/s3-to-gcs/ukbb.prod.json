@@ -1,0 +1,52 @@
+{
+  "name": "ukbb-ingest",
+  "description": "S3->GCS for UKBB",
+  "owner": "ops",
+  "google": {
+      "project": "broad-pharma5-transporter",
+      "region": "us-central1",
+      "zone": "c"
+  },
+  "terraform": {
+      "state_bucket": "broad-pharma5-transporter-terraform-state",
+      "state_path": "ops/s3-to-gcs/ukbb-ingest.tfstate.json",
+      "docker_image": "gcr.io/broad-dsp-gcr-public/terraform0.12:0.12.5"
+  },
+  "k8s": {
+      "cluster_name": "transporter-k8s-cluster",
+      "namespace": "ukbb"
+  },
+  "env": {
+      "VAULT_PREFIX": "secret/dsde/gotc/prod/ukbb",
+      "DNS_PROJECT": "broad-gotc-prod",
+      "DNS_ZONE_NAME": "gotc-prod",
+      "K8S_NODE_COUNT": 5,
+      "K8S_MACHINE_TYPE": "n1-standard-4",
+      "TRANSPORTER_VERSION": "028a39e94b6ed60a74a83b8c10b1c98f69ee849e",
+      "ENABLE_DNS": true,
+      "TRANSPORTER_DNS_NAME": "ukbb-transporter",
+      "TLS_KEY_SECRET": "secret/dsde/gotc/prod/common/server.key",
+      "TLS_KEY_FIELD": "server_key",
+      "TLS_CRT_SECRET": "secret/dsde/gotc/prod/common/server.crt",
+      "TLS_CRT_FIELD": "server_crt",
+      "TLS_CRT_BUNDLE_SECRET": "secret/common/ca-bundle.crt",
+      "TLS_CRT_BUNDLE_FIELD": "chain",
+      "S3_KEYS_SECRET": "secret/dsde/gotc/prod/pharma5/aws",
+      "GCS_SA_KEY_SECRET": "secret/dsde/gotc/prod/pharma5/biogen-transporter-service-account.json",
+      "OAUTH_CLIENT_ID": "1024425689477-199un4jvkvt1fl0n1m9ijn4acpmq5pnj.apps.googleusercontent.com",
+      "AUTHORIZED_EMAILS": [
+        "danmoran@broadinstitute.org",
+        "bcarlin@broadinstitute.org",
+        "rarshad@broadinstitute.org",
+        "jkorte@broadinstitute.org",
+        "samn@broadinstitute.org",
+        "gwade@broadinstitute.org",
+        "mreinema@broadinstitute.org",
+        "npetrill@broadinstitute.org",
+        "sahakian@broadinstitute.org",
+        "spletche@broadinstitute.org"
+      ],
+      "TRANSPORTER_AGENT_COUNT": 32,
+      "TRANSPORTER_AGENT_PARTITION_COUNT": 50
+  }
+}

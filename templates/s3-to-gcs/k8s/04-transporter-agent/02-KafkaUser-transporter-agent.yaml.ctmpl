@@ -58,6 +58,19 @@ spec:
           type: topic
           name: {{$secret.Data.agent_group}}
           patternType: prefix
+      # Allow inspecting Kafka's offset-tracking topic
+      - operation: Describe
+        type: allow
+        resource:
+          type: topic
+          name: __consumer_offsets
+          patternType: literal
+      - operation: Describe
+        type: allow
+        resource:
+          type: topic
+          name: __transaction_state
+          patternType: literal
       - operation: All
         type: allow
         resource:

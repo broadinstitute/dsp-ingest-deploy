@@ -1,9 +1,9 @@
 apiVersion: kafka.strimzi.io/v1beta1
 kind: KafkaTopic
 metadata:
-  name: transporter.requests
+  name: transporter.progress
   labels:
     strimzi.io/cluster: ingest-cluster
 spec:
-  partitions: 16
+  partitions: {{env "TRANSPORTER_AGENT_PARTITION_COUNT"}}
   replicas: 2

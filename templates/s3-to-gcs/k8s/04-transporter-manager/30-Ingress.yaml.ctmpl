@@ -1,17 +1,16 @@
 {{if (eq (env "ENABLE_DNS") "true")}}
-{{with $secretPrefix := env "TLS_CERT_SECRET_PREFIX"}}
-{{with $serverKey := secret (printf "%s/server.key" $secretPrefix)}}
-{{with $serverCrt := secret (printf "%s/server.crt" $secretPrefix)}}
-{{with $intermediateCrt := secret (printf "%s/server.intermediate.crt" $secretPrefix)}}
+{{with $serverKey := secret (env "TLS_KEY_SECRET")}}
+{{with $serverCrt := secret (env "TLS_CRT_SECRET")}}
+{{with $crtBundle := secret (env "TLS_CRT_BUNDLE_SECRET")}}
 kind: Secret
 apiVersion: v1
 metadata:
     name: wildcard.{{env "DNS_ZONE_NAME"}}.broadinstitute.org
 type: Opaque
 data:
-    tls.key: {{$serverKey.Data.value | base64Encode}}
-    tls.crt: {{(printf "%s\n%s" $serverCrt.Data.value $intermediateCrt.Data.value) | base64Encode}}
-{{end}}{{end}}{{end}}{{end}}
+    tls.key: {{index $serverKey.Data (env "TLS_KEY_FIELD") | base64Encode}}
+    tls.crt: {{(printf "%s\n%s" (index $serverCrt.Data (env "TLS_CRT_FIELD")) (index $crtBundle.Data (env "TLS_CRT_BUNDLE_FIELD"))) | base64Encode}}
+{{end}}{{end}}{{end}}
 ---
 apiVersion: extensions/v1beta1
 kind: Ingress
