@@ -46,6 +46,7 @@
         "sahakian@broadinstitute.org",
         "spletche@broadinstitute.org"
       ],
-      "TRANSPORTER_AGENT_COUNT": 16
+      "TRANSPORTER_AGENT_COUNT": 32,
+      "TRANSPORTER_AGENT_PARTITION_COUNT": 50
   }
 }

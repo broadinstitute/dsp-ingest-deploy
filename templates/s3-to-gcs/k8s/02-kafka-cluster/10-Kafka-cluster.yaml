@@ -27,8 +27,11 @@ spec:
         deleteClaim: false
     resources:
       requests:
-        cpu: 500m
-        memory: 2Gi
+        cpu: 1000m
+        memory: 3Gi
+      limits:
+        cpu: 2000m
+        memory: 4Gi
   zookeeper:
     replicas: 3
     storage:
