@@ -1,7 +1,7 @@
 
 module "k8s" {
   # terraform-shared repo
-  source = "github.com/broadinstitute/terraform-shared.git//terraform-modules/k8s?ref=k8s-0.1.4-tf-0.12"
+  source = "github.com/broadinstitute/terraform-shared.git//terraform-modules/k8s?ref=k8s-0.2.0-tf-0.12"
   dependencies = [module.enable-services]
   providers = {
     google = "google-beta"
