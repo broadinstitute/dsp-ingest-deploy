@@ -46,7 +46,17 @@ spec:
           readinessProbe:
             tcpSocket:
               port: 5432
+            initialDelaySeconds: 5
             timeoutSeconds: 1
+            periodSeconds: 1
+            failureThreshold: 3
+          livenessProbe:
+            tcpSocket:
+              port: 5432
+            initialDelaySeconds: 10
+            timeoutSeconds: 1
+            periodSeconds: 2
+            failureThreshold: 3
           volumeMounts:
             - name: cloudsql-keys
               mountPath: {{$cloudsqlCredsPath}}
