@@ -1,0 +1,31 @@
+{{if (eq (env "ENABLE_DNS") "true")}}
+{{with $serverKey := secret (env "TLS_KEY_SECRET")}}
+{{with $serverCrt := secret (env "TLS_CRT_SECRET")}}
+{{with $crtBundle := secret (env "TLS_CRT_BUNDLE_SECRET")}}
+kind: Secret
+apiVersion: v1
+metadata:
+    name: wildcard.{{env "DNS_ZONE_NAME"}}.broadinstitute.org
+type: Opaque
+data:
+    tls.key: {{index $serverKey.Data (env "TLS_KEY_FIELD") | base64Encode}}
+    tls.crt: {{(printf "%s\n%s" (index $serverCrt.Data (env "TLS_CRT_FIELD")) (index $crtBundle.Data (env "TLS_CRT_BUNDLE_FIELD"))) | base64Encode}}
+{{end}}{{end}}{{end}}
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: transporter-manager-ingress
+  annotations:
+    kubernetes.io/ingress.global-static-ip-name: "transporter-manager-ip"
+spec:
+  tls:
+    - secretName: wildcard.{{env "DNS_ZONE_NAME"}}.broadinstitute.org
+  rules:
+    - http:
+        paths:
+          - path: /*
+            backend:
+              serviceName: transporter-manager
+              servicePort: http
+{{end}}
