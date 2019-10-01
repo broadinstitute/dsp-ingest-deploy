@@ -1,5 +1,5 @@
 {
-  "name": "emerge-ingest",
+  "name": "emerge",
   "description": "SFTP->GCS for AnVIL eMerge",
   "owner": "ops",
   "google": {
@@ -9,7 +9,7 @@
   },
   "terraform": {
       "state_bucket": "anvil-transfer-terraform-state",
-      "state_path": "ops/sftp-to-gcs/anvil-ingest.tfstate.json",
+      "state_path": "ops/sftp-to-gcs/emerge-ingest.tfstate.json",
       "docker_image": "gcr.io/broad-dsp-gcr-public/terraform0.12:0.12.5"
   },
   "k8s": {
@@ -46,6 +46,8 @@
         "spletche@broadinstitute.org"
       ],
       "TRANSPORTER_AGENT_COUNT": 8,
-      "TRANSPORTER_AGENT_PARTITION_COUNT": 16
+      "TRANSPORTER_AGENT_PARTITION_COUNT": 16,
+      "KAFKA_RAM_GB": 3,
+      "KAFKA_DISK_SIZE_GB": 10
   }
 }

@@ -80,7 +80,7 @@ spec:
             - name: SUBMISSION_INTERVAL
               value: 5s
             - name: MAX_CONCURRENT_TRANSFERS
-              value: "{{env TRANSPORTER_AGENT_COUNT}}"
+              value: "{{env "TRANSPORTER_AGENT_COUNT"}}"
         - name: db-migrations
           image: us.gcr.io/broad-dsp-gcr-public/transporter-manager-migrations:{{$tag}}
           imagePullPolicy: IfNotPresent

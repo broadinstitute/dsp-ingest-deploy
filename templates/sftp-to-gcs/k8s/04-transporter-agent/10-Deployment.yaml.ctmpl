@@ -34,7 +34,7 @@ spec:
           emptyDir: {}
       initContainers:
         - name: agent-config
-          image: us.gcr.io/broad-dsp-gcr-public/transporter-sftp-to-gcp-agent-config:{{$tag}}
+          image: us.gcr.io/broad-dsp-gcr-public/transporter-sftp-to-gcs-agent-config:{{$tag}}
           imagePullPolicy: IfNotPresent
           volumeMounts:
             - name: appdir
@@ -89,7 +89,7 @@ spec:
               value: transporter.results
       containers:
         - name: agent
-          image: us.gcr.io/broad-dsp-gcr-public/transporter-sftp-to-gcp-agent:{{$tag}}
+          image: us.gcr.io/broad-dsp-gcr-public/transporter-sftp-to-gcs-agent:{{$tag}}
           imagePullPolicy: IfNotPresent
           command: [ "/bin/bash", "/etc/entrypoint.sh" ]
           env:
@@ -110,11 +110,11 @@ spec:
           volumeMounts:
             - name: appdir
               mountPath: /etc/application.conf
-              subPath: transporter-sftp-to-gcp-agent/application.conf
+              subPath: transporter-sftp-to-gcs-agent/application.conf
               readOnly: true
             - name: appdir
               mountPath: /etc/entrypoint.sh
-              subPath: transporter-sftp-to-gcp-agent/entrypoint.sh
+              subPath: transporter-sftp-to-gcs-agent/entrypoint.sh
             - name: gcs-sa-key
               mountPath: {{$gcsKeyPath}}
             - name: ca-cert
