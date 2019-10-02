@@ -87,6 +87,9 @@ spec:
               value: transporter.progress
             - name: RESULT_TOPIC
               value: transporter.results
+
+            - name: MIB_PER_TRANSFER_STEP
+              value: "{{env "MIB_PER_TRANSFER_STEP"}}"
       containers:
         - name: agent
           image: us.gcr.io/broad-dsp-gcr-public/transporter-sftp-to-gcs-agent:{{$tag}}
