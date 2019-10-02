@@ -1,0 +1,53 @@
+{
+  "name": "emerge",
+  "description": "SFTP->GCS for AnVIL eMerge",
+  "owner": "ops",
+  "google": {
+      "project": "anvil-transfer",
+      "region": "us-central1",
+      "zone": "c"
+  },
+  "terraform": {
+      "state_bucket": "anvil-transfer-terraform-state",
+      "state_path": "ops/sftp-to-gcs/emerge-ingest.tfstate.json",
+      "docker_image": "gcr.io/broad-dsp-gcr-public/terraform0.12:0.12.5"
+  },
+  "k8s": {
+      "cluster_name": "transporter-k8s-cluster",
+      "namespace": "emerge"
+  },
+  "env": {
+      "VAULT_PREFIX": "secret/dsde/gotc/prod/emerge",
+      "DNS_PROJECT": "broad-gotc-prod",
+      "DNS_ZONE_NAME": "gotc-prod",
+      "K8S_NODE_COUNT": 3,
+      "K8S_MACHINE_TYPE": "n1-standard-4",
+      "TRANSPORTER_VERSION": "af96a7a2c6d953c8df03f9f22943b01715d34722",
+      "ENABLE_DNS": true,
+      "TRANSPORTER_DNS_NAME": "emerge-transporter",
+      "TLS_KEY_SECRET": "secret/dsde/gotc/prod/common/server.key",
+      "TLS_KEY_FIELD": "server_key",
+      "TLS_CRT_SECRET": "secret/dsde/gotc/prod/common/server.crt",
+      "TLS_CRT_FIELD": "server_crt",
+      "TLS_CRT_BUNDLE_SECRET": "secret/common/ca-bundle.crt",
+      "TLS_CRT_BUNDLE_FIELD": "chain",
+      "SFTP_LOGIN_SECRET": "secret/dsde/gotc/prod/emerge/sftp-login",
+      "GCS_SA_KEY_SECRET": "secret/dsde/gotc/prod/emerge/transporter-service-account.json",
+      "OAUTH_CLIENT_ID": "605858457048-th8pmb9jcjcuiv2isob1ik2tt8h7nncp.apps.googleusercontent.com",
+      "AUTHORIZED_EMAILS": [
+        "danmoran@broadinstitute.org",
+        "rarshad@broadinstitute.org",
+        "jkorte@broadinstitute.org",
+        "samn@broadinstitute.org",
+        "gwade@broadinstitute.org",
+        "mreinema@broadinstitute.org",
+        "npetrill@broadinstitute.org",
+        "sahakian@broadinstitute.org",
+        "spletche@broadinstitute.org"
+      ],
+      "TRANSPORTER_AGENT_COUNT": 8,
+      "TRANSPORTER_AGENT_PARTITION_COUNT": 16,
+      "KAFKA_RAM_GB": 3,
+      "KAFKA_DISK_SIZE_GB": 10
+  }
+}

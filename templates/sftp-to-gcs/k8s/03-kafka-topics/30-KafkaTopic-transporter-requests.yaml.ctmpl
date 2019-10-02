@@ -1,0 +1,9 @@
+apiVersion: kafka.strimzi.io/v1beta1
+kind: KafkaTopic
+metadata:
+  name: transporter.requests
+  labels:
+    strimzi.io/cluster: ingest-cluster
+spec:
+  partitions: {{env "TRANSPORTER_AGENT_PARTITION_COUNT"}}
+  replicas: 2

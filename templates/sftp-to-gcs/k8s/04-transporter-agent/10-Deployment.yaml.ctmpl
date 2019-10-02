@@ -1,0 +1,138 @@
+{{with $secretPrefix := env "VAULT_PREFIX"}}
+{{with $gcsKeyPath := "/etc/gcs"}}
+{{with $gcsFileName := "gcs-writer-sa-key.json"}}
+{{with $tag := env "TRANSPORTER_VERSION"}}
+{{with $groupConfig := secret (printf "%s/kafka/group-ids/transporter" $secretPrefix)}}
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: transporter-agent
+spec:
+  replicas: {{env "TRANSPORTER_AGENT_COUNT"}}
+  template:
+    metadata:
+      labels:
+        app: transporter-agent
+    spec:
+      serviceAccountName: transporter-agent-sa
+      volumes:
+        - name: gcs-sa-key
+          secret:
+            secretName: transporter-gcs-sa-key
+            items:
+              - key: json-key
+                path: {{$gcsFileName}}
+                mode: 0444
+        - name: ca-cert
+          secret:
+            secretName: ingest-cluster-cluster-ca-cert
+            items:
+              - key: ca.crt
+                path: ca.crt
+                mode: 0444
+        - name: appdir
+          emptyDir: {}
+      initContainers:
+        - name: agent-config
+          image: us.gcr.io/broad-dsp-gcr-public/transporter-sftp-to-gcs-agent-config:{{$tag}}
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - name: appdir
+              mountPath: /working
+          env:
+            - name: KAFKA_BOOTSTRAP_URL
+              value: "ingest-cluster-kafka-bootstrap:9093"
+            - name: KAFKA_APPLICATION_ID
+              value: {{$groupConfig.Data.agent_group}}
+            - name: KAFKA_CLUSTER_TRUSTSTORE_PATH
+              value: /tmp/client.truststore.jks
+            - name: KAFKA_CLUSTER_TRUSTSTORE_PASSWORD
+              value: required-by-keytool-but-not-meaningful-outside-of-pod
+            - name: KAFKA_SCRAM_USERNAME
+              value: transporter-agent-user
+            - name: KAFKA_SCRAM_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: transporter-agent-user
+                  key: password
+            - name: KAFKA_SCRAM_ALGORITHM
+              value: sha-512
+
+            - name: SFTP_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: transporter-sftp-login
+                  key: host
+            - name: SFTP_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: transporter-sftp-login
+                  key: port
+            - name: SFTP_USER
+              valueFrom:
+                secretKeyRef:
+                  name: transporter-sftp-login
+                  key: username
+            - name: SFTP_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: transporter-sftp-login
+                  key: password
+            - name: GCS_WRITER_SA_KEY_PATH
+              value: "{{$gcsKeyPath}}/{{$gcsFileName}}"
+
+            - name: REQUEST_TOPIC
+              value: transporter.requests
+            - name: PROGRESS_TOPIC
+              value: transporter.progress
+            - name: RESULT_TOPIC
+              value: transporter.results
+      containers:
+        - name: agent
+          image: us.gcr.io/broad-dsp-gcr-public/transporter-sftp-to-gcs-agent:{{$tag}}
+          imagePullPolicy: IfNotPresent
+          command: [ "/bin/bash", "/etc/entrypoint.sh" ]
+          env:
+            - name: AGENT_HEAP_SIZE
+              value: 800m
+          lifecycle:
+            preStop:
+              exec:
+                # Give the app the chance to finish any in-flight transfer.
+                command: ["sh", "-ce", "kill -s TERM 1; while $(kill -0 1 2>/dev/null); do sleep 1; done"]
+          resources:
+            requests:
+              cpu: 333m
+              memory: 832Mi
+            limits:
+              cpu: 333m
+              memory: 864Mi
+          volumeMounts:
+            - name: appdir
+              mountPath: /etc/application.conf
+              subPath: transporter-sftp-to-gcs-agent/application.conf
+              readOnly: true
+            - name: appdir
+              mountPath: /etc/entrypoint.sh
+              subPath: transporter-sftp-to-gcs-agent/entrypoint.sh
+            - name: gcs-sa-key
+              mountPath: {{$gcsKeyPath}}
+            - name: ca-cert
+              mountPath: /etc/tls
+          readinessProbe:
+            httpGet:
+              path: /status
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 10
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /status
+              port: 8080
+            initialDelaySeconds: 20
+            periodSeconds: 20
+            timeoutSeconds: 10
+            failureThreshold: 3
+{{end}}{{end}}{{end}}{{end}}{{end}}

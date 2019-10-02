@@ -1,0 +1,19 @@
+profile_name = "{{env "PROFILE_NAME"}}"
+vault_prefix = "{{env "VAULT_PREFIX"}}"
+
+google_project = "{{env "GOOGLE_PROJECT"}}"
+google_region = "{{env "GOOGLE_REGION"}}"
+google_zone = "{{env "GOOGLE_ZONE"}}"
+
+enable_dns = {{env "ENABLE_DNS"}}
+dns_google_project = "{{env "DNS_PROJECT"}}"
+dns_zone_name = "{{env "DNS_ZONE_NAME"}}"
+transporter_dns_name = "{{env "TRANSPORTER_DNS_NAME"}}"
+
+k8s_cluster_name = "{{env "K8S_CLUSTER_NAME"}}"
+k8s_version = "{{env "LATEST_K8S_MASTER_VERSION"}}"
+k8s_node_count = {{env "K8S_NODE_COUNT"}}
+k8s_machine_type = "{{env "K8S_MACHINE_TYPE"}}"
+
+oauth_client_id = "{{env "OAUTH_CLIENT_ID"}}"
+authorized_emails = {{env "AUTHORIZED_EMAILS"}}

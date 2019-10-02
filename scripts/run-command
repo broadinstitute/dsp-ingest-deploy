@@ -14,15 +14,17 @@ PROJECT_DIR = Path(__file__).resolve().parents[1]
 
 def build_parser():
     parser = argparse.ArgumentParser(description='Run a deployment command on ingest configs.')
-    parser.add_argument('-e', '--env', dest='env',
+    parser.add_argument('--env', dest='env',
         help='Top-level environment to operate against.',
         choices=['dev', 'prod'], required=True)
-    parser.add_argument('-i', '--ingest-project', dest='ingest_project',
+    parser.add_argument('--ingest-project', dest='ingest_project',
         help='Optional refinement of the environment to point at a specific project (i.e. "v2f").',
         default='core')
-    parser.add_argument('-t', '--template', dest='template', required=True,
+    parser.add_argument('--template', dest='template', required=True,
         help='Collection of configs / templates to operate against.',
         choices=[d.name for d in (PROJECT_DIR / 'templates').iterdir() if d.is_dir()])
+    parser.add_argument('--layer', dest='layer', required=True,
+        choices=['terraform', 'k8s'], help='Deployment layer to operate on')
     parser.add_argument('--skip-clean', dest='clean', action='store_false',
         help='If set, existing content in the rendered/ output directory will not be deleted before re-rendering.')
     parser.add_argument('command', choices=['deploy', 'teardown'], help='Command to run.')
@@ -48,7 +50,8 @@ def run_command(args):
         subprocess.run([
             (PROJECT_DIR / 'dsp-k8s-deploy' / f'application-{args.command}.sh').as_posix(),
             '-p', config.as_posix(),
-            '-t', args.template
+            '-t', args.template,
+            '-l', args.layer
         ])
 
 
