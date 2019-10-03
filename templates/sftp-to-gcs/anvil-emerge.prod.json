@@ -22,7 +22,7 @@
       "DNS_ZONE_NAME": "gotc-prod",
       "K8S_NODE_COUNT": 3,
       "K8S_MACHINE_TYPE": "n1-standard-4",
-      "TRANSPORTER_VERSION": "476c05f93356b80726a86b219e8b79aac387107e",
+      "TRANSPORTER_VERSION": "7640c60069af6fed1d85b00220ba73a0d2f4519b",
       "ENABLE_DNS": true,
       "TRANSPORTER_DNS_NAME": "emerge-transporter",
       "TLS_KEY_SECRET": "secret/dsde/gotc/prod/common/server.key",
@@ -45,7 +45,7 @@
         "sahakian@broadinstitute.org",
         "spletche@broadinstitute.org"
       ],
-      "TRANSPORTER_AGENT_COUNT": 12,
+      "TRANSPORTER_AGENT_COUNT": 8,
       "TRANSPORTER_AGENT_PARTITION_COUNT": 16,
       "KAFKA_RAM_GB": 3,
       "KAFKA_DISK_SIZE_GB": 10,
