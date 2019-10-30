@@ -3,12 +3,28 @@
 {{with $gcsFileName := "gcs-writer-sa-key.json"}}
 {{with $tag := env "TRANSPORTER_VERSION"}}
 {{with $groupConfig := secret (printf "%s/kafka/group-ids/transporter" $secretPrefix)}}
-apiVersion: extensions/v1beta1
-kind: Deployment
+apiVersion: apps/v1
+kind: StatefulSet
 metadata:
   name: transporter-agent
 spec:
+  selector:
+    matchLabels:
+      app: transporter-agent
+  serviceName: transporter-agent
   replicas: {{env "TRANSPORTER_AGENT_COUNT"}}
+  podManagementPolicy: Parallel
+  updateStrategy:
+    type: RollingUpdate
+  volumeClaimTemplates:
+    - metadata:
+        name: streams-scratch-dir
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        storageClassName: agent-storage
+        resources:
+          requests:
+            storage: 5Gi
   template:
     metadata:
       labels:
@@ -92,6 +108,8 @@ spec:
 
             - name: MIB_PER_TRANSFER_STEP
               value: "{{env "MIB_PER_TRANSFER_STEP"}}"
+            - name: MAX_CONCURRENT_READS
+              value: "{{env "MAX_CONCURRENT_READS"}}"
       containers:
         - name: agent
           image: us.gcr.io/broad-dsp-gcr-public/transporter-sftp-to-gcs-agent:{{$tag}}
@@ -99,7 +117,7 @@ spec:
           command: [ "/bin/bash", "/etc/entrypoint.sh" ]
           env:
             - name: AGENT_HEAP_SIZE
-              value: 800m
+              value: 512m
           lifecycle:
             preStop:
               exec:
@@ -108,10 +126,10 @@ spec:
           resources:
             requests:
               cpu: 333m
-              memory: 832Mi
+              memory: 600Mi
             limits:
               cpu: 333m
-              memory: 864Mi
+              memory: 600Mi
           volumeMounts:
             - name: appdir
               mountPath: /etc/application.conf
@@ -124,11 +142,13 @@ spec:
               mountPath: {{$gcsKeyPath}}
             - name: ca-cert
               mountPath: /etc/tls
+            - name: streams-scratch-dir
+              mountPath: /tmp/kafka-streams
           readinessProbe:
             httpGet:
               path: /status
               port: 8080
-            initialDelaySeconds: 5
+            initialDelaySeconds: 60
             periodSeconds: 10
             timeoutSeconds: 10
             failureThreshold: 3
@@ -136,7 +156,7 @@ spec:
             httpGet:
               path: /status
               port: 8080
-            initialDelaySeconds: 20
+            initialDelaySeconds: 90
             periodSeconds: 20
             timeoutSeconds: 10
             failureThreshold: 3

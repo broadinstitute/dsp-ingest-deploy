@@ -1,5 +1,5 @@
 resource "random_id" "transporter-db-password" {
-    byte_length = 16
+    byte_length = 8
 }
 
 resource "google_sql_user" "transporter-db-user" {
