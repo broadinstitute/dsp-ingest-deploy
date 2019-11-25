@@ -2,6 +2,7 @@
 {{with $oauth_config := secret (printf "%s/transporter/oauth" $secretPrefix)}}
 {{with $group_config := secret (printf "%s/kafka/group-ids/transporter" $secretPrefix)}}
 {{with $tag := env "TRANSPORTER_VERSION"}}
+{{with $memMib := 1728}}
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
@@ -15,6 +16,8 @@ spec:
     spec:
       serviceAccountName: transporter-manager-sa
       volumes:
+        - name: appdir
+          emptyDir: {}
         - name: ca-cert
           secret:
             secretName: ingest-cluster-cluster-ca-cert
@@ -22,19 +25,76 @@ spec:
               - key: ca.crt
                 path: ca.crt
                 mode: 0444
-        - name: appdir
-          emptyDir: {}
+        - name: openidc-config
+          configMap:
+            name: openidc-config
+
       initContainers:
-        - name: manager-config
-          image: us.gcr.io/broad-dsp-gcr-public/transporter-manager-config:{{$tag}}
+        - name: db-migrations
+          image: us.gcr.io/broad-dsp-gcr-public/transporter-manager-migrations:{{$tag}}
           imagePullPolicy: IfNotPresent
+          command: [ "/usr/local/bin/entrypoint.sh", "liquibase", "update" ]
+          env:
+            - name: LIQUIBASE_HOST
+              value: cloudsql-proxy
+            - name: LIQUIBASE_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: transporter-db-login-info
+                  key: dbname
+            - name: LIQUIBASE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: transporter-db-login-info
+                  key: username
+            - name: LIQUIBASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: transporter-db-login-info
+                  key: password
+
+        - name: keytool
+          image: openjdk:8-alpine
+          imagePullPolicy: IfNotPresent
+          command:
+            - keytool
+            - -keystore
+            - /workdir/kafka.truststore.jks
+            - -storepass
+            - required-by-keytool-but-not-meaningful-outside-of-pod
+            - -storetype
+            - JKS
+            - -noprompt
+            - -alias
+            - CARoot
+            - -import
+            - -file
+            - /etc/tls/ca.crt
           volumeMounts:
             - name: appdir
-              mountPath: /working
+              mountPath: /workdir
+            - name: ca-cert
+              mountPath: /etc/tls
+
+      containers:
+        - name: manager
+          image: us.gcr.io/broad-dsp-gcr-public/transporter-manager:{{$tag}}
+          imagePullPolicy: Always
           env:
+            - name: JAVA_OPTS
+              value: >-
+                -server
+                -Xmx{{$memMib}}m
+                -Xms{{$memMib}}m
+                -XX:+PrintFlagsFinal
+                -XX:+PrintGCTimeStamps
+                -XX:+PrintGCDateStamps
+                -XX:+PrintGCDetails
+
             - name: OAUTH_CLIENT_ID
               value: {{$oauth_config.Data.client_id}}
-            - name: DB_URL
+
+            - name: DB_HOST
               value: cloudsql-proxy
             - name: DB_NAME
               valueFrom:
@@ -55,9 +115,11 @@ spec:
             - name: KAFKA_BOOTSTRAP_URL
               value: "ingest-cluster-kafka-bootstrap:9093"
             - name: KAFKA_CLUSTER_TRUSTSTORE_PATH
-              value: /tmp/client.truststore.jks
+              value: /etc/tls/kafka.truststore.jks
             - name: KAFKA_CLUSTER_TRUSTSTORE_PASSWORD
               value: required-by-keytool-but-not-meaningful-outside-of-pod
+            - name: KAFKA_SCRAM_ALGORITHM
+              value: sha-512
             - name: KAFKA_SCRAM_USERNAME
               value: transporter-manager-user
             - name: KAFKA_SCRAM_PASSWORD
@@ -65,57 +127,35 @@ spec:
                 secretKeyRef:
                   name: transporter-manager-user
                   key: password
-            - name: KAFKA_SCRAM_ALGORITHM
-              value: sha-512
             - name: KAFKA_GROUP_ID
               value: {{$group_config.Data.manager_group}}
 
-            - name: REQUEST_TOPIC
+            - name: KAFKA_REQUEST_TOPIC
               value: transporter.requests
-            - name: PROGRESS_TOPIC
+            - name: KAFKA_PROGRESS_TOPIC
               value: transporter.progress
-            - name: RESULT_TOPIC
+            - name: KAFKA_RESULT_TOPIC
               value: transporter.results
+            - name: KAFKA_MAX_MESSAGE_SIZE_MIB
+              value: "{{env "KAFKA_MAX_MESSAGE_SIZE_MIB"}}"
 
-            - name: SUBMISSION_INTERVAL
+            - name: TRANSFER_SUBMISSION_INTERVAL
               value: 5s
             - name: MAX_CONCURRENT_TRANSFERS
               value: "{{env "TRANSPORTER_AGENT_COUNT" | parseInt | multiply 2}}"
-            - name: MIB_PER_TRANSFER_STEP
-              value: "{{env "KAFKA_MAX_MESSAGE_SIZE_MIB"}}"
-        - name: db-migrations
-          image: us.gcr.io/broad-dsp-gcr-public/transporter-manager-migrations:{{$tag}}
-          imagePullPolicy: IfNotPresent
-          command: [ "/bin/bash", "/etc/entrypoint.sh", "liquibase", "update" ]
-          volumeMounts:
-            - name: appdir
-              mountPath: /etc/entrypoint.sh
-              subPath: transporter-manager-migrations/entrypoint.sh
-      containers:
-        - name: manager
-          image: us.gcr.io/broad-dsp-gcr-public/transporter-manager:{{$tag}}
-          imagePullPolicy: IfNotPresent
-          command: [ "/bin/bash", "/etc/entrypoint.sh" ]
-          env:
-            - name: TRANSPORTER_HEAP_SIZE
-              value: 1g
+
           resources:
             requests:
               cpu: 500m
-              memory: 1728Mi
+              memory: {{$memMib}}Mi
             limits:
               cpu: 500m
-              memory: 1920Mi
+              memory: {{add $memMib 128}}Mi
           volumeMounts:
             - name: appdir
-              mountPath: /etc/application.conf
-              subPath: transporter-manager/application.conf
+              mountPath: /etc/tls/kafka.truststore.jks
+              subPath: kafka.truststore.jks
               readOnly: true
-            - name: appdir
-              mountPath: /etc/entrypoint.sh
-              subPath: transporter-manager/entrypoint.sh
-            - name: ca-cert
-              mountPath: /etc/tls
           readinessProbe:
             httpGet:
               path: /status
@@ -132,6 +172,7 @@ spec:
             periodSeconds: 20
             timeoutSeconds: 10
             failureThreshold: 3
+
         - name: openidc-proxy
           image: broadinstitute/openidc-proxy:2.3.1_20190819
           ports:
@@ -157,9 +198,9 @@ spec:
             - name: OIDC_CLAIM2
               value:{{range $oauth_config.Data.authorized_emails}} Require claim email:{{.}}{{else}}Require valid-user{{end}}
           volumeMounts:
-            - name: appdir
+            - name: openidc-config
               mountPath: /etc/apache2/sites-available/site.conf
-              subPath: openidc-proxy/site.conf
+              subPath: site.conf
           readinessProbe:
             httpGet:
               path: /status
@@ -176,4 +217,4 @@ spec:
             periodSeconds: 10
             timeoutSeconds: 3
             failureThreshold: 3
-{{end}}{{end}}{{end}}{{end}}
+{{end}}{{end}}{{end}}{{end}}{{end}}

@@ -25,9 +25,3 @@ module "k8s" {
   enable_private_endpoint = false
   private_master_ipv4_cidr_block = local.k8s_master_private_ipv4_cidr
 }
-
-resource "google_compute_global_address" "k8s-ip" {
-  provider = "google-beta"
-  name = "k8s-100"
-  depends_on = [module.enable-services]
-}
