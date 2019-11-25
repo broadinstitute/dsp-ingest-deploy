@@ -79,7 +79,7 @@ spec:
       containers:
         - name: manager
           image: us.gcr.io/broad-dsp-gcr-public/transporter-manager:{{$tag}}
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           env:
             - name: JAVA_OPTS
               value: >-
