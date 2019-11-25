@@ -3,12 +3,29 @@
 {{with $gcsFileName := "gcs-writer-sa-key.json"}}
 {{with $tag := env "TRANSPORTER_VERSION"}}
 {{with $groupConfig := secret (printf "%s/kafka/group-ids/transporter" $secretPrefix)}}
-apiVersion: extensions/v1beta1
-kind: Deployment
+{{with $memMib := 512}}
+apiVersion: apps/v1
+kind: StatefulSet
 metadata:
   name: transporter-agent
 spec:
+  selector:
+    matchLabels:
+      app: transporter-agent
+  serviceName: transporter-agent
   replicas: {{env "TRANSPORTER_AGENT_COUNT"}}
+  podManagementPolicy: Parallel
+  updateStrategy:
+    type: RollingUpdate
+  volumeClaimTemplates:
+    - metadata:
+        name: streams-scratch-dir
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        storageClassName: agent-storage
+        resources:
+          requests:
+            storage: 5Gi
   template:
     metadata:
       labels:
@@ -33,21 +50,54 @@ spec:
         - name: appdir
           emptyDir: {}
       initContainers:
-        - name: transporter-aws-to-gcp-agent-config
-          image: us.gcr.io/broad-dsp-gcr-public/transporter-aws-to-gcp-agent-config:{{$tag}}
+        - name: keytool
+          image: openjdk:8-alpine
           imagePullPolicy: IfNotPresent
+          command:
+            - keytool
+            - -keystore
+            - /workdir/kafka.truststore.jks
+            - -storepass
+            - required-by-keytool-but-not-meaningful-outside-of-pod
+            - -storetype
+            - JKS
+            - -noprompt
+            - -alias
+            - CARoot
+            - -import
+            - -file
+            - /etc/tls/ca.crt
           volumeMounts:
             - name: appdir
-              mountPath: /working
+              mountPath: /workdir
+            - name: ca-cert
+              mountPath: /etc/tls
+
+      containers:
+        - name: agent
+          image: us.gcr.io/broad-dsp-gcr-public/transporter-aws-to-gcp-agent:{{$tag}}
+          imagePullPolicy: IfNotPresent
           env:
+            - name: JAVA_OPTS
+              value: >-
+                -server
+                -Xmx{{$memMib}}m
+                -Xms{{$memMib}}m
+                -XX:+PrintFlagsFinal
+                -XX:+PrintGCTimeStamps
+                -XX:+PrintGCDateStamps
+                -XX:+PrintGCDetails
+
             - name: KAFKA_BOOTSTRAP_URL
               value: "ingest-cluster-kafka-bootstrap:9093"
             - name: KAFKA_APPLICATION_ID
               value: {{$groupConfig.Data.agent_group}}
             - name: KAFKA_CLUSTER_TRUSTSTORE_PATH
-              value: /tmp/client.truststore.jks
+              value: /etc/tls/kafka.truststore.jks
             - name: KAFKA_CLUSTER_TRUSTSTORE_PASSWORD
               value: required-by-keytool-but-not-meaningful-outside-of-pod
+            - name: KAFKA_SCRAM_ALGORITHM
+              value: sha-512
             - name: KAFKA_SCRAM_USERNAME
               value: transporter-agent-user
             - name: KAFKA_SCRAM_PASSWORD
@@ -55,8 +105,15 @@ spec:
                 secretKeyRef:
                   name: transporter-agent-user
                   key: password
-            - name: KAFKA_SCRAM_ALGORITHM
-              value: sha-512
+
+            - name: KAFKA_REQUEST_TOPIC
+              value: transporter.requests
+            - name: KAFKA_PROGRESS_TOPIC
+              value: transporter.progress
+            - name: KAFKA_RESULT_TOPIC
+              value: transporter.results
+            - name: KAFKA_MAX_MESSAGE_SIZE_MIB
+              value: "{{env "KAFKA_MAX_MESSAGE_SIZE_MIB"}}"
 
             - name: AWS_ACCESS_KEY_ID
               valueFrom:
@@ -71,20 +128,6 @@ spec:
             - name: GCS_WRITER_SA_KEY_PATH
               value: "{{$gcsKeyPath}}/{{$gcsFileName}}"
 
-            - name: REQUEST_TOPIC
-              value: transporter.requests
-            - name: PROGRESS_TOPIC
-              value: transporter.progress
-            - name: RESULT_TOPIC
-              value: transporter.results
-      containers:
-        - name: transporter-aws-to-gcp-agent
-          image: broadinstitute/transporter-aws-to-gcp-agent:{{$tag}}
-          imagePullPolicy: IfNotPresent
-          command: [ "/bin/bash", "/etc/entrypoint.sh" ]
-          env:
-            - name: AGENT_HEAP_SIZE
-              value: 800m
           lifecycle:
             preStop:
               exec:
@@ -93,27 +136,24 @@ spec:
           resources:
             requests:
               cpu: 333m
-              memory: 832Mi
+              memory: {{add $memMib 64}}Mi
             limits:
               cpu: 333m
-              memory: 864Mi
+              memory: {{add $memMib 64}}Mi
           volumeMounts:
             - name: appdir
-              mountPath: /etc/application.conf
-              subPath: transporter-aws-to-gcp-agent/application.conf
+              mountPath: /etc/tls/kafka.truststore.jks
+              subPath: kafka.truststore.jks
               readOnly: true
-            - name: appdir
-              mountPath: /etc/entrypoint.sh
-              subPath: transporter-aws-to-gcp-agent/entrypoint.sh
             - name: gcs-sa-key
               mountPath: {{$gcsKeyPath}}
-            - name: ca-cert
-              mountPath: /etc/tls
+            - name: streams-scratch-dir
+              mountPath: /tmp/kafka-streams
           readinessProbe:
             httpGet:
               path: /status
               port: 8080
-            initialDelaySeconds: 5
+            initialDelaySeconds: 60
             periodSeconds: 10
             timeoutSeconds: 10
             failureThreshold: 3
@@ -121,8 +161,8 @@ spec:
             httpGet:
               path: /status
               port: 8080
-            initialDelaySeconds: 20
+            initialDelaySeconds: 90
             periodSeconds: 20
             timeoutSeconds: 10
             failureThreshold: 3
-{{end}}{{end}}{{end}}{{end}}{{end}}
+{{end}}{{end}}{{end}}{{end}}{{end}}{{end}}
