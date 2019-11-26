@@ -17,21 +17,27 @@ spec:
       transaction.state.log.replication.factor: 3
       transaction.state.log.min.isr: 2
       log.message.format.version: "2.2"
+      {{with $maxMib := env "KAFKA_MAX_MESSAGE_SIZE_MIB" | parseInt}}
+      {{with $maxBytes := multiply $maxMib 1024 | multiply 1024}}
+      replica.fetch.max.bytes: {{$maxBytes}}
+      replica.fetch.response.max.bytes: {{$maxBytes}}
+      message.max.bytes: {{$maxBytes}}
+      {{end}}{{end}}
     storage:
       type: jbod
       volumes:
       - id: 0
         type: persistent-claim
-        size: 20Gi
+        size: {{env "KAFKA_DISK_SIZE_GB"}}Gi
         class: kafka-storage
         deleteClaim: false
     resources:
       requests:
-        cpu: 1000m
-        memory: 3Gi
+        cpu: {{env "KAFKA_CPU_M"}}m
+        memory: {{env "KAFKA_RAM_GB"}}Gi
       limits:
-        cpu: 2000m
-        memory: 4Gi
+        cpu: {{env "KAFKA_CPU_M"}}m
+        memory: {{env "KAFKA_RAM_GB" | parseInt | add 1}}Gi
   zookeeper:
     replicas: 3
     storage:

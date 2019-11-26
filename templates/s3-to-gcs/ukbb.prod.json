@@ -22,7 +22,7 @@
       "DNS_ZONE_NAME": "gotc-prod",
       "K8S_NODE_COUNT": 5,
       "K8S_MACHINE_TYPE": "n1-standard-4",
-      "TRANSPORTER_VERSION": "028a39e94b6ed60a74a83b8c10b1c98f69ee849e",
+      "TRANSPORTER_VERSION": "0.0.0-88-eb9098b9",
       "ENABLE_DNS": true,
       "TRANSPORTER_DNS_NAME": "ukbb-transporter",
       "TLS_KEY_SECRET": "secret/dsde/gotc/prod/common/server.key",
@@ -46,7 +46,12 @@
         "sahakian@broadinstitute.org",
         "spletche@broadinstitute.org"
       ],
-      "TRANSPORTER_AGENT_COUNT": 32,
-      "TRANSPORTER_AGENT_PARTITION_COUNT": 50
+      "TRANSPORTER_AGENT_COUNT": 16,
+      "TRANSPORTER_AGENT_PARTITION_COUNT": 32,
+      "KAFKA_RAM_GB": 4,
+      "KAFKA_CPU_M": 1500,
+      "KAFKA_DISK_SIZE_GB": 20,
+      "MIB_PER_TRANSFER_STEP": 8,
+      "KAFKA_MAX_MESSAGE_SIZE_MIB": 15
   }
 }

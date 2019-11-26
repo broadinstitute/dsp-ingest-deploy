@@ -128,6 +128,9 @@ spec:
             - name: GCS_WRITER_SA_KEY_PATH
               value: "{{$gcsKeyPath}}/{{$gcsFileName}}"
 
+            - name: MIB_PER_TRANSFER_STEP
+              value: "{{env "MIB_PER_TRANSFER_STEP"}}"
+
           lifecycle:
             preStop:
               exec:
