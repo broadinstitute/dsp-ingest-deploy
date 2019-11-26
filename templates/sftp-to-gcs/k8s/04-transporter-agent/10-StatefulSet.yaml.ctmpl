@@ -3,6 +3,7 @@
 {{with $gcsFileName := "gcs-writer-sa-key.json"}}
 {{with $tag := env "TRANSPORTER_VERSION"}}
 {{with $groupConfig := secret (printf "%s/kafka/group-ids/transporter" $secretPrefix)}}
+{{with $memMib := 512}}
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -49,21 +50,54 @@ spec:
         - name: appdir
           emptyDir: {}
       initContainers:
-        - name: agent-config
-          image: us.gcr.io/broad-dsp-gcr-public/transporter-sftp-to-gcs-agent-config:{{$tag}}
+        - name: keytool
+          image: openjdk:8-alpine
           imagePullPolicy: IfNotPresent
+          command:
+            - keytool
+            - -keystore
+            - /workdir/kafka.truststore.jks
+            - -storepass
+            - required-by-keytool-but-not-meaningful-outside-of-pod
+            - -storetype
+            - JKS
+            - -noprompt
+            - -alias
+            - CARoot
+            - -import
+            - -file
+            - /etc/tls/ca.crt
           volumeMounts:
             - name: appdir
-              mountPath: /working
+              mountPath: /workdir
+            - name: ca-cert
+              mountPath: /etc/tls
+
+      containers:
+        - name: agent
+          image: us.gcr.io/broad-dsp-gcr-public/transporter-sftp-to-gcs-agent:{{$tag}}
+          imagePullPolicy: IfNotPresent
           env:
+            - name: JAVA_OPTS
+              value: >-
+                -server
+                -Xmx{{$memMib}}m
+                -Xms{{$memMib}}m
+                -XX:+PrintFlagsFinal
+                -XX:+PrintGCTimeStamps
+                -XX:+PrintGCDateStamps
+                -XX:+PrintGCDetails
+
             - name: KAFKA_BOOTSTRAP_URL
               value: "ingest-cluster-kafka-bootstrap:9093"
             - name: KAFKA_APPLICATION_ID
               value: {{$groupConfig.Data.agent_group}}
             - name: KAFKA_CLUSTER_TRUSTSTORE_PATH
-              value: /tmp/client.truststore.jks
+              value: /etc/tls/kafka.truststore.jks
             - name: KAFKA_CLUSTER_TRUSTSTORE_PASSWORD
               value: required-by-keytool-but-not-meaningful-outside-of-pod
+            - name: KAFKA_SCRAM_ALGORITHM
+              value: sha-512
             - name: KAFKA_SCRAM_USERNAME
               value: transporter-agent-user
             - name: KAFKA_SCRAM_PASSWORD
@@ -71,8 +105,13 @@ spec:
                 secretKeyRef:
                   name: transporter-agent-user
                   key: password
-            - name: KAFKA_SCRAM_ALGORITHM
-              value: sha-512
+
+            - name: KAFKA_REQUEST_TOPIC
+              value: transporter.requests
+            - name: KAFKA_PROGRESS_TOPIC
+              value: transporter.progress
+            - name: KAFKA_RESULT_TOPIC
+              value: transporter.results
             - name: KAFKA_MAX_MESSAGE_SIZE_MIB
               value: "{{env "KAFKA_MAX_MESSAGE_SIZE_MIB"}}"
 
@@ -96,28 +135,14 @@ spec:
                 secretKeyRef:
                   name: transporter-sftp-login
                   key: password
+
             - name: GCS_WRITER_SA_KEY_PATH
               value: "{{$gcsKeyPath}}/{{$gcsFileName}}"
-
-            - name: REQUEST_TOPIC
-              value: transporter.requests
-            - name: PROGRESS_TOPIC
-              value: transporter.progress
-            - name: RESULT_TOPIC
-              value: transporter.results
 
             - name: MIB_PER_TRANSFER_STEP
               value: "{{env "MIB_PER_TRANSFER_STEP"}}"
             - name: MAX_CONCURRENT_READS
               value: "{{env "MAX_CONCURRENT_READS"}}"
-      containers:
-        - name: agent
-          image: us.gcr.io/broad-dsp-gcr-public/transporter-sftp-to-gcs-agent:{{$tag}}
-          imagePullPolicy: IfNotPresent
-          command: [ "/bin/bash", "/etc/entrypoint.sh" ]
-          env:
-            - name: AGENT_HEAP_SIZE
-              value: 512m
           lifecycle:
             preStop:
               exec:
@@ -126,22 +151,17 @@ spec:
           resources:
             requests:
               cpu: 333m
-              memory: 600Mi
+              memory: {{add $memMib 64}}Mi
             limits:
               cpu: 333m
-              memory: 600Mi
+              memory: {{add $memMib 64}}Mi
           volumeMounts:
             - name: appdir
-              mountPath: /etc/application.conf
-              subPath: transporter-sftp-to-gcs-agent/application.conf
+              mountPath: /etc/tls/kafka.truststore.jks
+              subPath: kafka.truststore.jks
               readOnly: true
-            - name: appdir
-              mountPath: /etc/entrypoint.sh
-              subPath: transporter-sftp-to-gcs-agent/entrypoint.sh
             - name: gcs-sa-key
               mountPath: {{$gcsKeyPath}}
-            - name: ca-cert
-              mountPath: /etc/tls
             - name: streams-scratch-dir
               mountPath: /tmp/kafka-streams
           readinessProbe:
@@ -160,4 +180,4 @@ spec:
             periodSeconds: 20
             timeoutSeconds: 10
             failureThreshold: 3
-{{end}}{{end}}{{end}}{{end}}{{end}}
+{{end}}{{end}}{{end}}{{end}}{{end}}{{end}}
