@@ -28,6 +28,9 @@ spec:
         - name: openidc-config
           configMap:
             name: openidc-config
+        - name: agent-schema
+          configMap:
+            name: agent-schema
 
       initContainers:
         - name: db-migrations
@@ -84,16 +87,15 @@ spec:
             - name: JAVA_OPTS
               value: >-
                 -server
+                -Dconfig.file=/etc/config/schema.conf
                 -Xmx{{$memMib}}m
                 -Xms{{$memMib}}m
                 -XX:+PrintFlagsFinal
                 -XX:+PrintGCTimeStamps
                 -XX:+PrintGCDateStamps
                 -XX:+PrintGCDetails
-
             - name: OAUTH_CLIENT_ID
               value: {{$oauth_config.Data.client_id}}
-
             - name: DB_HOST
               value: cloudsql-proxy
             - name: DB_NAME
@@ -111,7 +113,6 @@ spec:
                 secretKeyRef:
                   name: transporter-db-login-info
                   key: password
-
             - name: KAFKA_BOOTSTRAP_URL
               value: "ingest-cluster-kafka-bootstrap:9093"
             - name: KAFKA_CLUSTER_TRUSTSTORE_PATH
@@ -129,7 +130,6 @@ spec:
                   key: password
             - name: KAFKA_GROUP_ID
               value: {{$group_config.Data.manager_group}}
-
             - name: KAFKA_REQUEST_TOPIC
               value: transporter.requests
             - name: KAFKA_PROGRESS_TOPIC
@@ -138,12 +138,10 @@ spec:
               value: transporter.results
             - name: KAFKA_MAX_MESSAGE_SIZE_MIB
               value: "{{env "KAFKA_MAX_MESSAGE_SIZE_MIB"}}"
-
             - name: TRANSFER_SUBMISSION_INTERVAL
               value: 5s
             - name: MAX_CONCURRENT_TRANSFERS
               value: "{{env "TRANSPORTER_AGENT_COUNT" | parseInt | multiply 2}}"
-
           resources:
             requests:
               cpu: 500m
@@ -156,6 +154,8 @@ spec:
               mountPath: /etc/tls/kafka.truststore.jks
               subPath: kafka.truststore.jks
               readOnly: true
+            - name: agent-schema
+              mountPath: /etc/config
           readinessProbe:
             httpGet:
               path: /status
