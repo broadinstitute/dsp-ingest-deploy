@@ -8,7 +8,7 @@ data "google_dns_managed_zone" "core-dns-zone" {
 resource "google_compute_global_address" "transporter-manager-ip" {
     count = var.enable_dns ? 1 : 0
     provider = "google"
-    name = "transporter-manager-ip"
+    name = "${var.profile_name}-transporter-ip"
     project = var.google_project
     depends_on = [module.enable-services]
 }

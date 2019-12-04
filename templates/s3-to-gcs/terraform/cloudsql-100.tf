@@ -32,10 +32,6 @@ resource "google_sql_database_instance" "postgres-100" {
                 name = "Broad"
                 value = local.broad_routeable_net
             }
-            authorized_networks {
-                name = "Kubernetes"
-                value = google_compute_global_address.k8s-ip.address
-            }
         }
 
         user_labels = {

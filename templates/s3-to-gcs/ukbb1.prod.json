@@ -1,11 +1,11 @@
 {
-  "name": "ukbb-ingest",
+  "name": "ukbb1",
   "description": "S3->GCS for UKBB",
   "owner": "ops",
   "google": {
       "project": "broad-pharma5-transporter",
-      "region": "us-central1",
-      "zone": "c"
+      "region": "us-east4",
+      "zone": "b"
   },
   "terraform": {
       "state_bucket": "broad-pharma5-transporter-terraform-state",
@@ -13,7 +13,7 @@
       "docker_image": "gcr.io/broad-dsp-gcr-public/terraform0.12:0.12.5"
   },
   "k8s": {
-      "cluster_name": "transporter-k8s-cluster",
+      "cluster_name": "transporter-k8s-cluster-1",
       "namespace": "ukbb"
   },
   "env": {
@@ -22,21 +22,20 @@
       "DNS_ZONE_NAME": "gotc-prod",
       "K8S_NODE_COUNT": 5,
       "K8S_MACHINE_TYPE": "n1-standard-4",
-      "TRANSPORTER_VERSION": "0.0.0-88-eb9098b9",
+      "TRANSPORTER_VERSION": "0.0.0-87-045cc6f1",
       "ENABLE_DNS": true,
-      "TRANSPORTER_DNS_NAME": "ukbb-transporter",
+      "TRANSPORTER_DNS_NAME": "ukbb-transporter-1",
       "TLS_KEY_SECRET": "secret/dsde/gotc/prod/common/server.key",
       "TLS_KEY_FIELD": "server_key",
       "TLS_CRT_SECRET": "secret/dsde/gotc/prod/common/server.crt",
       "TLS_CRT_FIELD": "server_crt",
       "TLS_CRT_BUNDLE_SECRET": "secret/common/ca-bundle.crt",
       "TLS_CRT_BUNDLE_FIELD": "chain",
-      "S3_KEYS_SECRET": "secret/dsde/gotc/prod/pharma5/aws",
+      "S3_KEYS_SECRET": "secret/dsde/monster/prod/ukbb/aws",
       "GCS_SA_KEY_SECRET": "secret/dsde/gotc/prod/pharma5/biogen-transporter-service-account.json",
       "OAUTH_CLIENT_ID": "1024425689477-199un4jvkvt1fl0n1m9ijn4acpmq5pnj.apps.googleusercontent.com",
       "AUTHORIZED_EMAILS": [
         "danmoran@broadinstitute.org",
-        "bcarlin@broadinstitute.org",
         "rarshad@broadinstitute.org",
         "jkorte@broadinstitute.org",
         "samn@broadinstitute.org",
@@ -47,7 +46,7 @@
         "spletche@broadinstitute.org"
       ],
       "TRANSPORTER_AGENT_COUNT": 16,
-      "TRANSPORTER_AGENT_PARTITION_COUNT": 32,
+      "TRANSPORTER_AGENT_PARTITION_COUNT": 16,
       "KAFKA_RAM_GB": 4,
       "KAFKA_CPU_M": 1500,
       "KAFKA_DISK_SIZE_GB": 20,
