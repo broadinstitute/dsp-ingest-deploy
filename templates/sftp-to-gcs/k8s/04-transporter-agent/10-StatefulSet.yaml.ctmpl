@@ -3,7 +3,7 @@
 {{with $gcsFileName := "gcs-writer-sa-key.json"}}
 {{with $tag := env "TRANSPORTER_VERSION"}}
 {{with $groupConfig := secret (printf "%s/kafka/group-ids/transporter" $secretPrefix)}}
-{{with $memMib := 512}}
+{{with $memMib := 640}}
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -151,10 +151,10 @@ spec:
           resources:
             requests:
               cpu: 333m
-              memory: {{add $memMib 64}}Mi
+              memory: {{multiply $memMib 2}}Mi
             limits:
               cpu: 333m
-              memory: {{add $memMib 64}}Mi
+              memory: {{multiply $memMib 2}}Mi
           volumeMounts:
             - name: appdir
               mountPath: /etc/tls/kafka.truststore.jks

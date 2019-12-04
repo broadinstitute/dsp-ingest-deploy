@@ -45,12 +45,12 @@
         "sahakian@broadinstitute.org",
         "spletche@broadinstitute.org"
       ],
-      "TRANSPORTER_AGENT_COUNT": 8,
+      "TRANSPORTER_AGENT_COUNT": 6,
       "TRANSPORTER_AGENT_PARTITION_COUNT": 8,
       "KAFKA_RAM_GB": 4,
       "KAFKA_DISK_SIZE_GB": 20,
       "MIB_PER_TRANSFER_STEP": 8,
-      "KAFKA_MAX_MESSAGE_SIZE_MIB": 15,
+      "KAFKA_MAX_MESSAGE_SIZE_MIB": 32,
       "MAX_CONCURRENT_READS": 64
   }
 }
