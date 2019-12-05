@@ -2,7 +2,7 @@
 {{with $oauth_config := secret (printf "%s/transporter/oauth" $secretPrefix)}}
 {{with $group_config := secret (printf "%s/kafka/group-ids/transporter" $secretPrefix)}}
 {{with $tag := env "TRANSPORTER_VERSION"}}
-{{with $memMib := 1728}}
+{{with $memMib := 3072}}
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
@@ -93,6 +93,8 @@ spec:
 
             - name: OAUTH_CLIENT_ID
               value: {{$oauth_config.Data.client_id}}
+            - name: WEB_RESPONSE_TIMEOUT
+              value: 120s
 
             - name: DB_HOST
               value: cloudsql-proxy
@@ -111,6 +113,10 @@ spec:
                 secretKeyRef:
                   name: transporter-db-login-info
                   key: password
+            - name: DB_MAX_CONNECTION_LIFETIME
+              value: 120s
+            - name: DB_LEAK_DETECTION_THRESHOLD
+              value: 120s
 
             - name: KAFKA_BOOTSTRAP_URL
               value: "ingest-cluster-kafka-bootstrap:9093"
@@ -146,11 +152,11 @@ spec:
 
           resources:
             requests:
-              cpu: 500m
-              memory: {{$memMib}}Mi
+              cpu: 3000m
+              memory: {{multiply $memMib 2}}Mi
             limits:
-              cpu: 500m
-              memory: {{add $memMib 128}}Mi
+              cpu: 3000m
+              memory: {{multiply $memMib 2}}Mi
           volumeMounts:
             - name: appdir
               mountPath: /etc/tls/kafka.truststore.jks
@@ -184,7 +190,7 @@ spec:
             - name: PROXY_URL2
               value: "http://localhost:8080/api"
             - name: LOG_LEVEL
-              value: debug
+              value: warn
             - name: PROXY_PATH
               value: /
             - name: AUTH_TYPE
