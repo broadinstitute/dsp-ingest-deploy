@@ -1,3 +1,0 @@
-google_project = "{{env "GOOGLE_PROJECT"}}"
-dns_zone = "{{env "DNS_ZONE"}}"
-dns_zone_name = "{{env "DNS_ZONE_NAME"}}"

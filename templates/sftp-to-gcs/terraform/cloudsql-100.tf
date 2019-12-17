@@ -17,7 +17,7 @@ resource "google_sql_database_instance" "postgres-100" {
         activation_policy = "ALWAYS"
         pricing_plan = "PER_USE"
         replication_type = "SYNCHRONOUS"
-        tier = "db-g1-small"
+        tier = "db-custom-4-15360"
 
         backup_configuration {
             binary_log_enabled = false
