@@ -21,7 +21,11 @@ spec:
       {{with $maxBytes := multiply $maxMib 1024 | multiply 1024}}
       replica.fetch.max.bytes: {{$maxBytes}}
       replica.fetch.response.max.bytes: {{$maxBytes}}
+      replica.socket.receive.buffer.bytes: {{$maxBytes}}
       message.max.bytes: {{$maxBytes}}
+      socket.request.max.bytes: {{$maxBytes}}
+      socket.receive.buffer.bytes: {{$maxBytes}}
+      socket.send.buffer.bytes: {{$maxBytes}}
       {{end}}{{end}}
     storage:
       type: jbod

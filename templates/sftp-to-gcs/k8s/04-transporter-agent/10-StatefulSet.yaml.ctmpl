@@ -3,7 +3,7 @@
 {{with $gcsFileName := "gcs-writer-sa-key.json"}}
 {{with $tag := env "TRANSPORTER_VERSION"}}
 {{with $groupConfig := secret (printf "%s/kafka/group-ids/transporter" $secretPrefix)}}
-{{with $memMib := 1024}}
+{{with $memMib := 3072}}
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:

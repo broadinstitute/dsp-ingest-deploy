@@ -146,9 +146,9 @@ spec:
               value: "{{env "KAFKA_MAX_MESSAGE_SIZE_MIB"}}"
 
             - name: TRANSFER_SUBMISSION_INTERVAL
-              value: 1s
+              value: 500ms
             - name: MAX_CONCURRENT_TRANSFERS
-              value: "{{env "TRANSPORTER_AGENT_COUNT" | parseInt | multiply 2}}"
+              value: "{{env "TRANSPORTER_AGENT_COUNT" | parseInt | multiply 4}}"
 
           resources:
             requests:
